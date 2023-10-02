@@ -1,5 +1,15 @@
 <script setup>
+import { defineProps, toRefs } from 'vue'
 import Image from 'primevue/image'
+import { stringifyQuery } from 'vue-router';
+
+const props = defineProps({
+  name:String,
+  avatarURL:String,
+  
+
+})
+
 </script>
 
 <template>
