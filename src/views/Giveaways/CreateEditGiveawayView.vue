@@ -22,6 +22,7 @@ const statusOptions = ref([
   { name: 'Closed', value: 'closed' }
 ])
 
+
 const giveawayInfo = ref({
   name: '',
   type: '',
