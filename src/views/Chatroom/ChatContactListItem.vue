@@ -5,7 +5,7 @@ import Avatar from 'primevue/Avatar'
 import Badge from 'primevue/Badge'
 
 const props = defineProps({
-  avatarImageUrl: String,
+  avatarImage: String || null,
   contactName: String,
   lastMessage: String,
   lastMessageTime: String,
@@ -14,7 +14,7 @@ const props = defineProps({
 })
 
 const {
-  avatarImageUrl,
+  avatarImage,
   contactName,
   lastMessage,
   lastMessageTime,
@@ -26,7 +26,8 @@ const {
 <template>
   <li class="chat-list-item" :class="{ 'selected-contact': contactName === selectedContactName }">
     <div class="chat-list-item-avatar">
-      <Avatar label="P" shape="circle" size="large" />
+      <Avatar v-if="avatarImage" :image="avatarImage" shape="circle" size="large" />
+      <Avatar v-else label="P" shape="circle" size="large" />
     </div>
     <div class="chat-list-item-content">
       <div class="chat-list-item-content-top">
@@ -60,7 +61,7 @@ const {
 
 .chat-list-item:hover {
   background: #ffe6d6;
-  opacity: 0.5;
+  /* opacity: 0.5; */
 }
 
 .chat-list-item.selected-contact {
