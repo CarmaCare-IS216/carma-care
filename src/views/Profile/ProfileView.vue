@@ -3,6 +3,7 @@ import Tab from '../../components/Tab/Tab.vue'
 import TabsWrapper from '../../components/Tab/TabsWrapper.vue'
 import Button from 'primevue/Button';
 import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
+import Avatar from 'primevue/Avatar';
 
 import { ref } from 'vue'
 
@@ -15,6 +16,8 @@ const profileInfo = ref({
   description: 'Hello people!  I’m a student from SMU! It’s Singapore Management University in case you don’t know! I love to volunteer during my free time.  I also do giveaways as well. ',
   giveaways: 186,
   requests: 97,
+  profilePhoto: "https://avatarfiles.alphacoders.com/342/342016.jpg",
+  // profilePhoto: null,
 })
 
 </script>
@@ -23,7 +26,8 @@ const profileInfo = ref({
   <main class="remove-padding">
     <section class="profile">
       <div class="profile-content">
-        <div class="profile-photo pi pi-user"></div>
+        <Avatar v-if="profileInfo.profilePhoto" :image=profileInfo.profilePhoto class="profile-photo" shape="circle" />
+        <Avatar v-else image="https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg" class="profile-photo" shape="circle" />
         <div class="profile-info">
           <div style="display: flex; justify-content: space-between; padding-bottom: 20px;">
             <div>
@@ -147,8 +151,6 @@ const profileInfo = ref({
   .profile-photo {
     height: 150px;
     width: 150px;
-    line-height: 150px;
-    font-size: 6rem;
   }
   .icon {
     display: none
@@ -157,7 +159,7 @@ const profileInfo = ref({
     font-size: 0;
   }
   .statistics-icon-wrapper {
-    width: 100px;
+    max-width: 100px;
   }
 }
 Button.icon {
