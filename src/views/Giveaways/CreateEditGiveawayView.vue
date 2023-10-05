@@ -4,6 +4,8 @@ import router from '../../router'
 import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
 
 import CardContainer from '../../components/CardContainer/CardContainer.vue'
+
+import Dialog from 'primevue/dialog';
 import Button from 'primevue/Button'
 import InputText from 'primevue/InputText'
 import Dropdown from 'primevue/Dropdown'
@@ -35,6 +37,9 @@ const giveawayInfo = ref({
   },
   photos: []
 })
+
+
+const visible = ref(false);
 
 const handleBackBtn = () => {
   router.go(-1)
@@ -159,6 +164,13 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
     </div>
   </main>
   <!-- Dialog goes here -->
+  <Dialog v-model:visible="visible" modal header="DIALOG" :style="{ width: '50vw' }">
+    <section class="preview">
+        <!-- Card goes here -->
+         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </p>
+      </section>
+        </Dialog>
 </template>
 
 <style scoped>
