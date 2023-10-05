@@ -22,6 +22,7 @@ const statusOptions = ref([
   { name: 'Closed', value: 'closed' }
 ])
 
+
 const giveawayInfo = ref({
   name: '',
   type: '',
@@ -107,13 +108,33 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
 
             <CardContainer title="Location Information">
               <div class="location-information">
-                <p>Add in Location Information content here</p>
+              
+                <span class="p-float-label location">
+                  <InputText v-model="giveawayInfo.locationInfo.name" class="w-full" />
+                  <label>Location Address</label>
+                </span>
+
+                <span class="p-float-label giveaway-location-description">
+                  <Textarea
+                    v-model="giveawayInfo.locationInfo.description"
+                    autoResize
+                    rows="5"
+                    cols="30"
+                    class="w-full"
+                  />
+                  <label>Location Description</label>
+                </span>
+
+
+
+                
               </div>
             </CardContainer>
 
             <CardContainer title="Photo Gallery">
               <div class="photo-gallery">
                 <p>Add in Photo Gallery content here</p>
+
               </div>
             </CardContainer>
           </div>
