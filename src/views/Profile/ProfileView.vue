@@ -2,10 +2,12 @@
 import Tab from '../../components/Tab/Tab.vue'
 import TabsWrapper from '../../components/Tab/TabsWrapper.vue'
 import Button from 'primevue/Button';
+import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
 
 import { ref } from 'vue'
 
 const showLog = () => console.log('helloooo')
+const tabletScreen = useMatchMedia(screenSize.tablet)
 
 const profileInfo = ref({
   name: 'Peter Parker',
@@ -52,7 +54,8 @@ const profileInfo = ref({
               </div>
             </div>
             <div>
-              <Button type="button" class="statistics-button" label="View Statistics" icon="pi pi-chart-bar"/>
+              <Button v-if="tabletScreen" type="button" class="statistics-button" icon="pi pi-chart-bar"/>
+              <Button v-else type="button" class="statistics-button" label="View Statistics" icon="pi pi-chart-bar"/>
             </div>
           </div>
         </div>
@@ -133,12 +136,13 @@ const profileInfo = ref({
   /* background: plum; */
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 768px) {
   .profile-content {
     grid-template-areas:
       'profile-photo statistics'
       'profile-info profile-info';
     align-items: center;
+    width: 100%;
   }
   .profile-photo {
     height: 150px;
@@ -152,7 +156,7 @@ const profileInfo = ref({
   .statistics-button {
     font-size: 0;
   }
-  .wrapper {
+  .statistics-icon-wrapper {
     width: 100px;
   }
 }
