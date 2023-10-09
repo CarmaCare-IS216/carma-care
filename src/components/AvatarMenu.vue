@@ -1,11 +1,13 @@
 <script setup>
 import { ref } from 'vue'
 import router from '../router'
+import { supabase } from '../lib/supabase'
 import { useMatchMedia, screenSize } from '../composables/useMatchMedia'
 
 import Avatar from 'primevue/Avatar'
 import Menu from 'primevue/Menu'
 import NavCarmaCoins from './NavCarmaCoins.vue'
+import { userStore } from '../stores/user'
 
 const menu = ref()
 const items = ref([
@@ -41,6 +43,18 @@ const items = ref([
 
 const toggle = (event) => {
   menu.value.toggle(event)
+}
+
+const handleLogout = async () => {
+  const { error } = await supabase.auth.signOut()
+
+  if (error) {
+    console.log(error)
+  } else {
+    console.log('Logout successfully')
+    userStore.currentUser = null
+    router.push({ name: 'Login' })
+  }
 }
 
 const tabletScreen = useMatchMedia(screenSize.tablet)
@@ -80,6 +94,7 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
       <template #end>
         <div style="border-top: solid 1px #e2e2e2"></div>
         <button
+          @click="handleLogout"
           class="w-full p-link flex align-items-center p-2 pl-4 text-color hover:surface-200 border-noround"
         >
           <i class="pi pi-sign-out text-red-500" />

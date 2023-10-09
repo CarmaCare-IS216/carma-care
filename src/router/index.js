@@ -12,8 +12,12 @@ import CreateEditProfileView from '@/views/Profile/CreateEditProfileView.vue'
 
 import ChatroomView from '@/views/Chatroom/ChatroomView.vue'
 
+import AuthView from '@/views/Auth/AuthView.vue'
+
 // layouts
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+
+import { userStore } from '../stores/user'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,7 +35,8 @@ const router = createRouter({
       name: 'Create Giveaway',
       component: CreateEditGiveawayView,
       meta: {
-        layout: DefaultLayout
+        layout: DefaultLayout,
+        requiresAuth: true
       }
     },
 
@@ -48,7 +53,8 @@ const router = createRouter({
       name: 'Create Request',
       component: CreateEditRequestView,
       meta: {
-        layout: DefaultLayout
+        layout: DefaultLayout,
+        requiresAuth: true
       }
     },
 
@@ -57,7 +63,8 @@ const router = createRouter({
       name: 'Profile',
       component: ProfileView,
       meta: {
-        layout: DefaultLayout
+        layout: DefaultLayout,
+        requiresAuth: true
       }
     },
     {
@@ -74,6 +81,24 @@ const router = createRouter({
       name: 'Chatroom',
       component: ChatroomView,
       meta: {
+        layout: DefaultLayout,
+        requiresAuth: true
+      }
+    },
+
+    {
+      path: '/login',
+      name: 'Login',
+      component: AuthView,
+      meta: {
+        layout: DefaultLayout
+      }
+    },
+    {
+      path: '/signup',
+      name: 'Signup',
+      component: AuthView,
+      meta: {
         layout: DefaultLayout
       }
     }
@@ -87,6 +112,24 @@ const router = createRouter({
     //   component: () => import('../views/AboutView.vue')
     // }
   ]
+})
+
+async function getUser(next) {
+  if (userStore.currentUser == null) {
+    next('/login')
+  } else {
+    next()
+  }
+}
+
+// auth requirements
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth) {
+    console.log('requires auth')
+    getUser(next)
+  } else {
+    next()
+  }
 })
 
 export default router
