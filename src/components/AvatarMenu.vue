@@ -1,13 +1,26 @@
 <script setup>
 import { ref } from 'vue'
+
+// router
 import router from '../router'
+
+// supabase
 import { supabase } from '../lib/supabase'
+
+// composables
 import { useMatchMedia, screenSize } from '../composables/useMatchMedia'
 
+// primevue
 import Avatar from 'primevue/Avatar'
 import Menu from 'primevue/Menu'
+
+// custom components
 import NavCarmaCoins from './NavCarmaCoins.vue'
-import { userStore } from '../stores/user'
+
+// stores
+import { useUserStore } from '../stores/user'
+
+const user = useUserStore()
 
 const menu = ref()
 const items = ref([
@@ -52,7 +65,7 @@ const handleLogout = async () => {
     console.log(error)
   } else {
     console.log('Logout successfully')
-    userStore.currentUser = null
+    user.currentUser = null
     router.push({ name: 'Login' })
   }
 }

@@ -17,7 +17,8 @@ import AuthView from '@/views/Auth/AuthView.vue'
 // layouts
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 
-import { userStore } from '../stores/user'
+// stores
+import { useUserStore } from '../stores/user'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -115,7 +116,8 @@ const router = createRouter({
 })
 
 async function getUser(next) {
-  if (userStore.currentUser == null) {
+  const user = useUserStore()
+  if (user.currentUser == null) {
     next('/login')
   } else {
     next()

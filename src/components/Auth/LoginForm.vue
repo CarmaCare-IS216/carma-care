@@ -1,27 +1,24 @@
 <script setup>
 import { ref } from 'vue'
-import { supabase } from '../../lib/supabase'
+
+// router
 import router from '../../router'
 
+// supabase
+import { supabase } from '../../lib/supabase'
+
+// primevue
 import InputText from 'primevue/InputText'
 import Password from 'primevue/Password'
 import Button from 'primevue/Button'
 
+// stores
+import { useUserStore } from '../../stores/user'
+
+const user = useUserStore()
+
 const email = ref('')
 const password = ref('')
-
-const handleSignUp = async () => {
-  const { data, error } = await supabase.auth.signUp({
-    email: email.value,
-    password: password.value
-  })
-
-  if (error) {
-    console.log(error)
-  } else {
-    console.log(data)
-  }
-}
 
 const handleLogin = async () => {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -81,6 +78,11 @@ const seeCurrentUser = async () => {
           @click="router.push({ name: 'Signup' })"
         />
       </div>
+      <Button
+        label="Check"
+        severity="warning"
+        @click="console.log(JSON.parse(JSON.stringify(user.currentUser)))"
+      />
     </div>
   </form>
 </template>
