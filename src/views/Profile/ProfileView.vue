@@ -1,24 +1,29 @@
 <script setup>
 import Tab from '../../components/Tab/Tab.vue'
 import TabsWrapper from '../../components/Tab/TabsWrapper.vue'
-import Button from 'primevue/Button';
 import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
+import Button from 'primevue/Button';
 import Avatar from 'primevue/Avatar';
-
-import { ref } from 'vue'
+import Dialog from 'primevue/dialog';
+import Tag from 'primevue/tag';
+import { ref } from 'vue';
 
 const showLog = () => console.log('helloooo')
-const tabletScreen = useMatchMedia(screenSize.tablet)
 
+const tabletScreen = useMatchMedia(screenSize.tablet)
 const profileInfo = ref({
-  name: 'Peter Parker',
+  fullName: 'Peter Parker',
   username: '@peterparker',
   description: 'Hello people!  I’m a student from SMU! It’s Singapore Management University in case you don’t know! I love to volunteer during my free time.  I also do giveaways as well. ',
   giveaways: 186,
   requests: 97,
   profilePhoto: "https://avatarfiles.alphacoders.com/342/342016.jpg",
   // profilePhoto: null,
+  dietaryRestrictions: ['Vegetarian', 'Halal'],
+  allergies: [],
 })
+var visible = ref(false);
+let toggleModal = () => visible.value = !visible.value;
 
 </script>
 
@@ -31,13 +36,13 @@ const profileInfo = ref({
         <div class="profile-info">
           <div style="display: flex; justify-content: space-between; padding-bottom: 20px;">
             <div>
-              <h1>{{ profileInfo.name }}</h1>
+              <h1>{{ profileInfo.fullName }}</h1>
               <p>{{ profileInfo.username }}</p>
             </div>
             <Button type="button" class="edit-button" label="Edit Profile" icon="pi pi-cog"/>
           </div>
           <p style="padding-bottom: 20px;">{{ profileInfo.description }}</p>
-          <Button class="dietary-restrictions">Dietary Restrictions</Button>
+          <Button class="dietary-restrictions" @click="visible = true">Dietary Preferences</Button>
         </div>
         <div class="profile-statistics">
           <div style="width: fill-available; display: flex; align-items: center; justify-content: space-between;">
@@ -76,10 +81,33 @@ const profileInfo = ref({
       </TabsWrapper>
     </section>
   </main>
+
+  <div v-if="visible" class="modal" @click="toggleModal"></div>
+  <Dialog :visible="visible" :header="`${profileInfo.fullName}'s Dietary Preferences`" :style="{ width: '50vw' }">
+        <h3>Dietary Restrictions</h3>
+        <div v-if="profileInfo.dietaryRestrictions.length != 0">
+          <Tag v-for="(item, index) in profileInfo.dietaryRestrictions" :key="index"
+              class="category tag"
+              :value="item"
+          ></Tag>
+        </div>
+        <div v-else>
+          <p>None</p>
+        </div>
+        <h3 style="margin-top: 10px">Allergies</h3>
+        <div v-if="profileInfo.allergies.length != 0">
+          <Tag v-for="(item, index) in profileInfo.dietaryRestrictions" :key="index"
+              class="category tag"
+              :value="item"
+          ></Tag>
+        </div>
+        <div v-else>
+          <p>None</p>
+        </div>
+    </Dialog>
 </template>
 
 <style scoped>
-
 .statistics-icon-wrapper {
   display: flex;
   width: 150px;
@@ -92,6 +120,17 @@ const profileInfo = ref({
   color: black;
   border-radius: 100px;
   border-color: black;
+}
+.modal {
+  top: 0;
+  position: fixed;
+  background: rgba(0,0,0,0.5);
+  width: 100%;
+  height: 100%;
+}
+.tag {
+  background-color: var(--color-primary);
+  margin-right: 5px;
 }
 .edit-button {
   background:grey;
@@ -120,7 +159,6 @@ const profileInfo = ref({
   width: 600px;
   justify-content: center;
 }
-
 .profile-photo {
   grid-area: profile-photo;
   background: darkgray;
@@ -137,7 +175,6 @@ const profileInfo = ref({
 }
 .profile-statistics {
   grid-area: statistics;
-  /* background: plum; */
 }
 
 @media only screen and (max-width: 768px) {
