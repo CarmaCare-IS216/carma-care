@@ -37,7 +37,7 @@ let toggleModal = () => visible.value = !visible.value;
           <div style="display: flex; justify-content: space-between; padding-bottom: 20px;">
             <div>
               <h1>{{ profileInfo.fullName }}</h1>
-              <p>{{ profileInfo.username }}</p>
+              <p style="color: var(--color-primary)">{{ profileInfo.username }}</p>
             </div>
             <Button type="button" class="edit-button" label="Edit Profile" icon="pi pi-cog"/>
           </div>
@@ -116,10 +116,10 @@ let toggleModal = () => visible.value = !visible.value;
   margin-right: 20px;
 }
 .statistics-button {
-  background:white;
-  color: black;
+  background: none;
+  color: var(--color-primary);
   border-radius: 100px;
-  border-color: black;
+  border-color: var(--color-primary);
 }
 .modal {
   top: 0;
@@ -133,7 +133,7 @@ let toggleModal = () => visible.value = !visible.value;
   margin-right: 5px;
 }
 .edit-button {
-  background:grey;
+  background: var(--color-primary);
   color: white;
   border-radius: 100px;
   border: none;
@@ -200,7 +200,7 @@ let toggleModal = () => visible.value = !visible.value;
   }
 }
 Button.icon {
-  background: lightgray;
+  background: rgba(246,132,56,0.75);
   color:black;
   border-radius: 100%;
   outline: none;
@@ -208,8 +208,8 @@ Button.icon {
   margin-right: 15px;
 }
 Button.dietary-restrictions {
-  color:black;
-  border-color: black;
+  color:var(--color-primary);
+  border-color: var(--color-primary);
   background: none;
   border-radius: 50px;
   outline: none;
