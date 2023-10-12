@@ -6,7 +6,18 @@ import Avatar from 'primevue/Avatar'
 import 'primeicons/primeicons.css'
 import Tag from 'primevue/tag'
 const props = defineProps({
-  record: Object
+  listingType: String,
+  username: String,
+  avatarUrl: String,
+  postingTime: String,
+  locationAddress:String,
+  category: String,
+  image: String,
+  listingTitle: String,
+  tags: Array,
+  status: String,
+  quantityNum: Number,
+  quantityUnit: String
 })
 </script>
 
@@ -17,12 +28,12 @@ const props = defineProps({
         <div class="card-header-avatar" >
           <!-- card header avatar goes in here -->
           <Avatar
-            v-if="record.avatarURL!=''"
+            v-if="avatarUrl!=null"
             id="avatar"
             class="mr-2"
             size="large"
             shape="circle"
-            :image=record.avatarURL
+            :image=avatarUrl
           />
           <Avatar
             v-else
@@ -30,7 +41,7 @@ const props = defineProps({
             class="mr-2"
             size="large"
             shape="circle"
-            :label=record.username[0].toUpperCase()
+            :label=username[0].toUpperCase()
           />
         </div>
 
@@ -38,7 +49,7 @@ const props = defineProps({
           <div class="card-header-top">
             <span class="card-header-name">
               <!-- card header name goes in here -->
-              {{ record["posterID"] }}
+              {{ username }}
             </span>
             <div class="card-header-edit-btn">
               <!-- card header edit button goes in here -->
@@ -49,12 +60,12 @@ const props = defineProps({
           <div class="card-header-bottom">
             <span class="card-header-time">
               <!-- card header time goes in here -->
-              {{ Date.now()-record["postingTime"] }} ago
+              {{ Date.now()-postingTime }} ago
             </span>
             <span class="card-header-location">
               <!-- card header location goes in here -->
               <i class="pi pi-map-marker"></i>
-              {{ record["locationAddress"] }}
+              {{ locationAddress }}
             </span>
           </div>
         </div>
@@ -65,12 +76,12 @@ const props = defineProps({
           <!-- card image tag goes in here -->
           <img
             class="card-image"
-            :src=record.images
+            :src=image
             alt=""
           />
           <Tag
             id="tag"
-            :value="record.category"
+            :value="category"
             style="
               margin: 2px, 0, 0, 5px;
               border: solid 1px black;
@@ -85,11 +96,11 @@ const props = defineProps({
       <div class="card-content">
         <div class="card-content-title">
           <!-- card title goes in here -->
-          {{ record["listingTitle"] }}
+          {{ listingTitle }}
         </div>
         <div class="card-content-tags">
           <!-- card tags goes in here -->
-          <Tag v-for="(item, index) in record['tags']" :key="index"
+          <Tag v-for="(item, index) in tags" :key="index"
             class="category"
             :value="item"
 
@@ -101,15 +112,15 @@ const props = defineProps({
 
       <div class="card-footer">
         <!-- card item status goes in here -->
-        <Tag v-if="record.status=='Available'"   severity="success" :value="record.status"></Tag>
-        <Tag v-else   severity="warning" :value="record.status"></Tag>
+        <Tag v-if="status=='Available'"   severity="success" :value="status"></Tag>
+        <Tag v-else   severity="warning" :value="status"></Tag>
 
 
 
-        <div class="card-item-servings">
+        <div class="card-item-servings" v-if="category=='food'">
           <!-- card item servings goes in here -->
           <i class="pi pi-user"></i>
-          {{ record["quantityNum"] }} {{ record["quantityUnit"] }}
+          {{ quantityNum }} {{ quantityUnit }}
         </div>
       </div>
     </div>
