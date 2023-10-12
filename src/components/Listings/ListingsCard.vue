@@ -17,11 +17,20 @@ const props = defineProps({
         <div class="card-header-avatar" >
           <!-- card header avatar goes in here -->
           <Avatar
+            v-if="record.avatarURL!=''"
             id="avatar"
             class="mr-2"
             size="large"
             shape="circle"
             :image=record.avatarURL
+          />
+          <Avatar
+            v-else
+            id="avatar"
+            class="mr-2"
+            size="large"
+            shape="circle"
+            :label=record.username[0].toUpperCase()
           />
         </div>
 
