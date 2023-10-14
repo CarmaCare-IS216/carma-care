@@ -36,7 +36,7 @@ const route = useRoute()
 
     <div class="nav-btns">
       <template v-if="route.name !== 'Login' && route.name !== 'Signup'">
-        <template v-if="user.currentUser === null">
+        <template v-if="user.currentUser === undefined">
           <Button
             label="Login"
             severity="warning"

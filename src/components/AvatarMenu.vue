@@ -65,7 +65,7 @@ const handleLogout = async () => {
     console.log(error)
   } else {
     console.log('Logout successfully')
-    user.currentUser = null
+    user.currentUser = undefined
     router.push({ name: 'Login' })
   }
 }
@@ -101,7 +101,7 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
         <a class="flex" v-bind="props.action">
           <span v-bind="props.icon" />
           <span v-bind="props.label">{{ label }}</span>
-          <Badge v-if="item.badge" class="ml-auto" :value="item.badge" />
+          <!-- <Badge v-if="item.badge" class="ml-auto" :value="item.badge" /> -->
         </a>
       </template>
       <template #end>

@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount } from 'vue'
+import { onMounted } from 'vue'
 
 // supabase
 import { supabase } from './lib/supabase'
@@ -9,15 +9,17 @@ import { useUserStore } from './stores/user'
 
 const user = useUserStore()
 
-onBeforeMount(() => {
+onMounted(() => {
   supabase.auth.getSession().then(({ data }) => {
     user.currentUser = data.user
     user.session = data.session
   })
 
   supabase.auth.onAuthStateChange((_, _session) => {
-    user.currentUser = _session.user
-    user.session = _session
+    if (_session !== null) {
+      user.currentUser = _session.user
+      user.session = _session
+    }
   })
 })
 </script>

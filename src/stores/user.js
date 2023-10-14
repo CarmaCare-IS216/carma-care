@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
+import { reactive } from 'vue'
 
 export const useUserStore = defineStore('user', {
   state: () => {
     return {
-      currentUser: {},
-      session: {}
+      currentUser: reactive({}),
+      session: reactive({})
     }
   },
   actions: {}

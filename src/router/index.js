@@ -127,7 +127,6 @@ async function getUser(next) {
 // auth requirements
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth) {
-    console.log('requires auth')
     getUser(next)
   } else {
     next()
