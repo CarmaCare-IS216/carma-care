@@ -12,13 +12,9 @@ import InputText from 'primevue/InputText'
 import Password from 'primevue/Password'
 import Button from 'primevue/Button'
 
-// stores
-import { useUserStore } from '../../stores/user'
-
-const user = useUserStore()
-
 const email = ref('')
 const password = ref('')
+const errorMessage = ref(null)
 
 const handleLogin = async () => {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -27,11 +23,19 @@ const handleLogin = async () => {
   })
 
   if (error) {
-    console.log(error)
+    console.log('Login Error: ', error)
+    errorMessage.value = error.message
+
+    email.value = ''
+    password.value = ''
   } else {
     console.log(data)
     router.push({ name: 'Giveaways' })
   }
+}
+
+const resetErrorMessage = () => {
+  errorMessage.value = null
 }
 
 const seeCurrentUser = async () => {
@@ -42,14 +46,15 @@ const seeCurrentUser = async () => {
 
 <template>
   <form v-on:keyup.enter="handleLogin" class="auth-container">
+    <div v-if="errorMessage" class="error-message">*{{ errorMessage }}</div>
     <div class="input-container">
       <span class="p-float-label">
-        <InputText v-model="email" class="w-full" />
+        <InputText @focus="resetErrorMessage" v-model="email" class="w-full" />
         <label>Email</label>
       </span>
 
       <span class="p-float-label">
-        <Password v-model="password" toggleMask>
+        <Password @focus="resetErrorMessage" v-model="password" toggleMask>
           <template #header>
             <h6>Pick a password</h6>
           </template>
@@ -78,11 +83,6 @@ const seeCurrentUser = async () => {
           @click="router.push({ name: 'Signup' })"
         />
       </div>
-      <Button
-        label="Check"
-        severity="warning"
-        @click="console.log(JSON.parse(JSON.stringify(user.currentUser)))"
-      />
     </div>
   </form>
 </template>
@@ -106,5 +106,11 @@ const seeCurrentUser = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.error-message {
+  color: red;
+  text-align: center;
+  margin-bottom: 20px;
 }
 </style>
