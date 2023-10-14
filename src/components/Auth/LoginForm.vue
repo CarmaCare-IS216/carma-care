@@ -12,6 +12,11 @@ import InputText from 'primevue/InputText'
 import Password from 'primevue/Password'
 import Button from 'primevue/Button'
 
+// vue-toastification
+import { useToast, POSITION } from 'vue-toastification'
+
+const toast = useToast()
+
 const email = ref('')
 const password = ref('')
 const errorMessage = ref(null)
@@ -26,11 +31,20 @@ const handleLogin = async () => {
     console.log('Login Error: ', error)
     errorMessage.value = error.message
 
+    toast.error(error.message, {
+      position: POSITION.TOP_CENTER,
+      timeout: 2000
+    })
+
     email.value = ''
     password.value = ''
   } else {
     console.log(data)
     router.push({ name: 'Giveaways' })
+    toast.success('Logged in successfully', {
+      position: POSITION.TOP_CENTER,
+      timeout: 2000
+    })
   }
 }
 

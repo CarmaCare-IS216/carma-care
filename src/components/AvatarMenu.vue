@@ -14,12 +14,16 @@ import { useMatchMedia, screenSize } from '../composables/useMatchMedia'
 import Avatar from 'primevue/Avatar'
 import Menu from 'primevue/Menu'
 
+// vue-toastification
+import { useToast, POSITION } from 'vue-toastification'
+
 // custom components
 import NavCarmaCoins from './NavCarmaCoins.vue'
 
 // stores
 import { useUserStore } from '../stores/user'
 
+const toast = useToast()
 const user = useUserStore()
 
 const menu = ref()
@@ -67,6 +71,10 @@ const handleLogout = async () => {
     console.log('Logout successfully')
     user.currentUser = null
     router.push({ name: 'Login' })
+    toast.success('Logged out successfully', {
+      position: POSITION.TOP_CENTER,
+      timeout: 2000
+    })
   }
 }
 
