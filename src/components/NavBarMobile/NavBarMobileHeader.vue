@@ -1,13 +1,38 @@
 <script setup>
+import { useRoute } from 'vue-router'
+
+// primevue
+import Button from 'primevue/Button'
+
+// custom components
 import NotificationButton from '../NotificationButton.vue'
 import Logo from '../Logo/Logo.vue'
+
+// router
+import router from '../../router'
+
+// stores
+import { useUserStore } from '../../stores/user'
+
+const user = useUserStore()
+const route = useRoute()
 </script>
 
 <template>
   <div class="nav-mobile-header">
     <Logo />
-    <h3 class="page-title">{{ $route.name }}</h3>
-    <NotificationButton />
+    <h3 class="page-title">{{ route.name }}</h3>
+
+    <template v-if="route.name !== 'Login'">
+      <Button
+        v-if="user.currentUser === null"
+        label="Login"
+        severity="warning"
+        size="small"
+        @click="router.push({ name: 'Login' })"
+      />
+      <NotificationButton v-else />
+    </template>
   </div>
 </template>
 

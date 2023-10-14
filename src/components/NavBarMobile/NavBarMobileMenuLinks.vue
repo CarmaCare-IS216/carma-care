@@ -1,5 +1,10 @@
 <script setup>
 import AvatarMenu from '../AvatarMenu.vue'
+import { useUserStore } from '../../stores/user'
+
+import Avatar from 'primevue/Avatar'
+
+const user = useUserStore()
 </script>
 
 <template>
@@ -20,10 +25,32 @@ import AvatarMenu from '../AvatarMenu.vue'
           <span> Requests</span>
         </router-link>
       </li>
-      <li class="nav-avatar-menu nav-link-active">
+      <li v-if="user.currentUser !== null" class="nav-avatar-menu">
         <AvatarMenu />
         <span class="label">My Profile</span>
       </li>
+      <router-link
+        v-else
+        :to="{ name: 'Login' }"
+        :class="{ 'nav-link-active': $route.name === 'Login' }"
+      >
+        <li class="nav-avatar-menu" style="margin-bottom: 2px">
+          <Avatar
+            icon="pi pi-user"
+            shape="circle"
+            :style="
+              $route.name === 'Login'
+                ? {
+                    background: 'transparent',
+                    color: 'var(--color-primary)',
+                    border: 'solid 2px var(--color-primary)'
+                  }
+                : {}
+            "
+          />
+          <span class="label" style="font-size: 1em">My Profile</span>
+        </li>
+      </router-link>
     </ul>
   </nav>
 </template>
