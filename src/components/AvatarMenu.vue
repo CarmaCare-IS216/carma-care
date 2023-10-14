@@ -65,7 +65,7 @@ const handleLogout = async () => {
     console.log(error)
   } else {
     console.log('Logout successfully')
-    user.currentUser = undefined
+    user.currentUser = null
     router.push({ name: 'Login' })
   }
 }

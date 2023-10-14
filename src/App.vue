@@ -11,8 +11,10 @@ const user = useUserStore()
 
 onMounted(() => {
   supabase.auth.getSession().then(({ data }) => {
-    user.currentUser = data.user
-    user.session = data.session
+    if (data.session !== null) {
+      user.currentUser = data.user
+      user.session = data.session
+    }
   })
 
   supabase.auth.onAuthStateChange((_, _session) => {

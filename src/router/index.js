@@ -73,7 +73,8 @@ const router = createRouter({
       name: 'Create Profile',
       component: CreateEditProfileView,
       meta: {
-        layout: DefaultLayout
+        layout: DefaultLayout,
+        requiresAuth: true
       }
     },
 
@@ -117,7 +118,7 @@ const router = createRouter({
 
 async function getUser(next) {
   const user = useUserStore()
-  if (user.currentUser == null) {
+  if (user.currentUser === null) {
     next('/login')
   } else {
     next()
