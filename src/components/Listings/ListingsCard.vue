@@ -16,10 +16,56 @@ const props = defineProps({
   listingTitle: String,
   tags: Array,
   status: String,
-  quantityNum: Number,
-  quantityUnit: String
+  quantityNum: Number
 })
+// Calculate the time difference in milliseconds
+const timeDifference = Date.now() - Date.parse(props.postingTime);
+
+// Calculate the time difference in different units
+const milliseconds = timeDifference;
+const seconds = timeDifference / 1000;
+const minutes = seconds / 60;
+const hours = minutes / 60;
+const days = hours / 24;
+console.log(days)
+var timeDiff
+if (days > 1){
+  if (days.toFixed(0)==1){
+    timeDiff=days.toFixed(0) + " day"
+  }
+  else{
+    timeDiff=days.toFixed(0) + " days"
+  }
+
+}
+else if (hours>1){
+  if (hours.toFixed(0)==1){
+    timeDiff=hours.toFixed(0) + " hour"
+  }
+  else{
+    timeDiff=hours.toFixed(0) + " hours"
+  }
+}
+else if (minutes>1){
+  if (minutes.toFixed(0)==1){
+    timeDiff=minutes.toFixed(0) + " minute"
+  }
+  else{
+    timeDiff=minutes.toFixed(0) + " minutes"
+  }
+}
+else if (seconds>1){
+  if (seconds.toFixed(0)==1){
+    timeDiff=seconds.toFixed(0) + " second"
+  }
+  else{
+    timeDiff=seconds.toFixed(0) + " seconds"
+  }
+}
 </script>
+
+
+
 
 <template>
   <router-link to="#">
@@ -60,7 +106,7 @@ const props = defineProps({
           <div class="card-header-bottom">
             <span class="card-header-time">
               <!-- card header time goes in here -->
-              {{ Date.now()-postingTime }} ago
+              {{ timeDiff }} ago
             </span>
             <span class="card-header-location">
               <!-- card header location goes in here -->
@@ -120,12 +166,18 @@ const props = defineProps({
         <div class="card-item-servings" v-if="category=='food'">
           <!-- card item servings goes in here -->
           <i class="pi pi-user"></i>
-          {{ quantityNum }} {{ quantityUnit }}
+          {{ quantityNum }} servings
         </div>
       </div>
     </div>
   </router-link>
 </template>
+
+
+
+
+
+
 
 <style scoped>
 a {
