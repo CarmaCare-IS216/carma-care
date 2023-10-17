@@ -1,29 +1,215 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
+import Image from 'primevue/image'
+import Avatar from 'primevue/Avatar'
 import Button from 'primevue/Button'
 import InputText from 'primevue/InputText'
 import Textarea from 'primevue/Textarea'
+import Dropdown from 'primevue/Dropdown'
+import MultiSelect from 'primevue/multiselect'
 
-import Stepper from '../../components/Stepper/Stepper.vue'
-import StepperPanel from '../../components/Stepper/StepperPanel.vue'
-import StepperFooter from '../../components/Stepper/StepperFooter.vue'
+import { DIETARY_RESTRICTIONS, FOOD_ALLERGENS } from '../../util/constants'
+import { convertConstantsToDropdownOptions } from '../../util/helper'
+import router from '../../router'
 
-const basicInformation = ref({
-  name: '',
+import { useToast, POSITION } from 'vue-toastification'
+
+import { useUserStore } from '../../stores/user'
+
+const user = useUserStore()
+const toast = useToast()
+const dietaryRestrictionsOptions = convertConstantsToDropdownOptions(DIETARY_RESTRICTIONS)
+const allergiesOptions = convertConstantsToDropdownOptions(FOOD_ALLERGENS)
+
+const profile = ref({
+  avatarUrl: null,
+  username: '',
   handle: '',
-  description: ''
+  description: '',
+  dietaryRestrictions: '',
+  allergies: [],
+  locationName: '',
+  locationDescription: ''
+})
+const fileUploadRef = ref()
+
+const getInitials = computed(() => {
+  const username = profile.value.username // Access the username property from the ref object
+
+  if (username === '') return ''
+
+  return username.charAt(0).toUpperCase() // Use charAt(0) to get the first character
 })
 
-const validateBasicInformation = () => {
-  console.log('validate')
+const preventAtKey = (event) => {
+  if (event.key === '@') {
+    event.preventDefault()
+  }
+}
+
+const handleFileChanged = (event) => {
+  const target = event.target
+  if (target && target.files) {
+    profile.value.avatarUrl = URL.createObjectURL(target.files[0])
+    console.log(profile.value.avatarUrl)
+  }
+}
+
+const handleRemoveFile = () => {
+  profile.value.avatarUrl = null
+  fileUploadRef.value.value = ''
+}
+
+const handleCreateProfile = () => {
+  console.log('profile created')
+  router.push({ name: 'Giveaways' })
+  toast.success('Your profile has been created successfully!', {
+    position: POSITION.TOP_CENTER,
+    timeout: 2000
+  })
+}
+const handleBackBtn = () => {
+  router.go(-1)
 }
 </script>
 
 <template>
   <main>
     <div class="container container-create-profile">
-      <Stepper>
+      <div class="container-basic-information">
+        <h2 class="grid-header">
+          <!-- <i class="pi pi-user" style="font-size: 1.5rem"></i> -->
+          Basic Information
+        </h2>
+        <!-- Avatar Url -->
+        <!-- <Avatar
+          v-if="profile.avatarUrl !== null"
+          :image="profile.avatarUrl"
+          class="profile-photo"
+          shape="circle"
+        /> -->
+        <Image
+          v-if="profile.avatarUrl !== null"
+          :src="profile.avatarUrl"
+          alt="Image"
+          class="grid-avatar profile-photo profile-photo-image"
+          preview
+        />
+        <template v-else>
+          <Avatar v-if="profile.username !== ''" class="profile-avatar grid-avatar" shape="circle">
+            <span>{{ getInitials }}</span>
+          </Avatar>
+          <Avatar v-else class="profile-avatar grid-avatar" shape="circle">
+            <i class="pi pi-user"></i>
+          </Avatar>
+        </template>
+
+        <div class="grid-upload">
+          <input
+            type="file"
+            style="display: none"
+            ref="fileUploadRef"
+            @change="handleFileChanged($event)"
+            accept="image/*"
+            capture
+          />
+          <Button
+            icon="pi pi-camera"
+            label="Choose Photo"
+            severity="warning"
+            size="small"
+            rounded
+            outlined
+            @click="fileUploadRef.click()"
+          />
+          <Button
+            v-if="profile.avatarUrl !== null"
+            icon="pi pi-times"
+            label="Remove Photo"
+            severity="danger"
+            size="small"
+            rounded
+            outlined
+            @click="handleRemoveFile"
+          />
+        </div>
+
+        <span class="p-float-label grid-username">
+          <InputText v-model="profile.username" class="w-full" />
+          <label>Username</label>
+        </span>
+
+        <div class="p-inputgroup flex-1 grid-handle">
+          <span class="p-inputgroup-addon">@</span>
+          <span class="p-float-label">
+            <InputText @keydown="preventAtKey" v-model="profile.handle" class="w-full" />
+            <label>Handle</label>
+          </span>
+        </div>
+
+        <span class="p-float-label grid-description">
+          <Textarea v-model="profile.description" autoResize rows="5" cols="30" class="w-full" />
+          <label>Description</label>
+        </span>
+      </div>
+
+      <div class="container-dietary-restrictions w-full">
+        <h2>Dietary Restrictions</h2>
+        <!-- dietary restrictions - dropdown -->
+        <div class="p-float-label">
+          <Dropdown
+            v-model="profile.dietaryRestrictions"
+            :options="dietaryRestrictionsOptions"
+            optionLabel="label"
+            optionValue="value"
+            class="w-full"
+          />
+
+          <label for="dd-city">Select a diet</label>
+        </div>
+
+        <!-- food allergies - multiselect - chips -->
+        <span class="p-float-label">
+          <MultiSelect
+            display="chip"
+            v-model="profile.allergies"
+            :options="allergiesOptions"
+            optionLabel="label"
+            optionValue="value"
+            class="w-full"
+          />
+          <label>Food Allergies</label>
+        </span>
+      </div>
+
+      <div class="container-location-address">
+        <h2>Location Address</h2>
+        <!-- location name - InputText -->
+        <span class="p-float-label">
+          <InputText v-model="profile.locationName" class="w-full" />
+          <label>Location Name</label>
+        </span>
+
+        <!-- location description - TextArea -->
+        <span class="p-float-label">
+          <Textarea
+            v-model="profile.locationDescription"
+            autoResize
+            rows="5"
+            cols="30"
+            class="w-full"
+          />
+          <label>Lcation Description</label>
+        </span>
+      </div>
+
+      <div class="btn-container">
+        <Button @click="handleBackBtn" label="Cancel" severity="warning" outlined rounded />
+        <Button @click="handleCreateProfile" label="Create Profile" severity="warning" rounded />
+      </div>
+
+      <!-- <Stepper>
         <StepperPanel title="Basic Information">
           <div class="container-basic-information">
             <span class="p-float-label">
@@ -72,17 +258,17 @@ const validateBasicInformation = () => {
             <Button label="Create Profile" rounded />
           </StepperFooter>
         </StepperPanel>
-      </Stepper>
+      </Stepper> -->
     </div>
   </main>
 </template>
 
-<style scoped>
+<style>
 .container-create-profile {
   display: grid;
-  justify-content: center;
-  max-width: 700px;
-  width: 100%;
+  /* justify-content: center; */
+  margin-bottom: 40px;
+  max-width: 650px;
   /* border: solid; */
 }
 
@@ -91,6 +277,92 @@ const validateBasicInformation = () => {
 .container-location-address {
   display: grid;
   gap: 40px;
-  margin-top: 40px;
+  margin-bottom: 40px;
+  /* min-width: 650px; */
+  width: 100%;
+}
+
+.container-basic-information {
+  grid-template-areas:
+    'grid-header      grid-header'
+    'grid-avatar      grid-avatar'
+    'grid-upload      grid-upload'
+    'grid-username    grid-handle'
+    'grid-description grid-description';
+}
+
+h2 {
+  color: var(--color-primary);
+}
+
+.grid-header {
+  grid-area: grid-header;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.grid-avatar {
+  grid-area: grid-avatar;
+}
+.grid-upload {
+  grid-area: grid-upload;
+  width: fit-content;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.grid-username {
+  grid-area: grid-username;
+}
+.grid-handle {
+  grid-area: grid-handle;
+}
+.grid-description {
+  grid-area: grid-description;
+}
+
+.profile-avatar {
+  margin-left: auto;
+  margin-right: auto;
+  width: 200px;
+  height: 200px;
+}
+
+.profile-avatar > i,
+.profile-avatar > span {
+  font-size: 6rem;
+}
+
+.profile-photo-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: auto;
+}
+.profile-photo-image > img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+}
+
+.btn-container {
+  width: 100%;
+  display: flex;
+  justify-content: right;
+  gap: 15px;
+}
+
+@media screen and (max-width: 768px) {
+  .container-basic-information {
+    grid-template-areas:
+      'grid-header'
+      'grid-avatar'
+      'grid-upload'
+      'grid-username'
+      'grid-handle'
+      'grid-description';
+  }
 }
 </style>
