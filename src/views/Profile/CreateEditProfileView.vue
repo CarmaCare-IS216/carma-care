@@ -16,6 +16,7 @@ import router from '../../router'
 import { useToast, POSITION } from 'vue-toastification'
 
 import { useUserStore } from '../../stores/user'
+import { supabase } from '../../lib/supabase'
 
 const user = useUserStore()
 const toast = useToast()
@@ -32,6 +33,8 @@ const profile = ref({
   locationName: '',
   locationDescription: ''
 })
+
+const selectedFile = ref(null)
 const fileUploadRef = ref()
 
 const getInitials = computed(() => {
@@ -48,22 +51,60 @@ const preventAtKey = (event) => {
   }
 }
 
-const handleFileChanged = (event) => {
-  const target = event.target
-  if (target && target.files) {
-    profile.value.avatarUrl = URL.createObjectURL(target.files[0])
-    console.log(profile.value.avatarUrl)
-  }
+const handleFileChanged = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  // const { data, error } = await supabase.storage
+  //   .from('avatars')
+  //   .upload(`avatar_${user.currentUser.id}.png`, file)
+
+  // if (error) {
+  //   console.log(error)
+  //   return
+  // }
+  profile.value.avatarUrl = URL.createObjectURL(file)
+  toast.success('Your avatar has been uploaded', {
+    position: POSITION.TOP_CENTER,
+    timeout: 2000
+  })
 }
 
 const handleRemoveFile = () => {
   profile.value.avatarUrl = null
   fileUploadRef.value.value = ''
+  selectedFile.value = null
 }
 
-const handleCreateProfile = () => {
+const handleCreateProfile = async () => {
   console.log('profile created')
+
+  const { error } = await supabase.from('userProfiles').insert({
+    id: user.currentUser.id,
+    avatarUrl: profile.value.avatarUrl,
+    username: profile.value.username,
+    handle: profile.value.handle,
+    description: profile.value.description,
+    allergies: profile.value.allergies,
+    locationName: profile.value.locationName,
+    locationDescription: profile.value.locationDescription
+  })
+
+  if (error) {
+    console.log('create profile: ', error)
+    toast.error(error.message, {
+      position: POSITION.TOP_CENTER,
+      timeout: 2000
+    })
+    return
+  }
+
+  user.fetchUserProfile(user.currentUser.id).then((data) => {
+    user.profile = data
+  })
+
   router.push({ name: 'Giveaways' })
+
   toast.success('Your profile has been created successfully!', {
     position: POSITION.TOP_CENTER,
     timeout: 2000
