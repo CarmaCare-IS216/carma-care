@@ -58,6 +58,16 @@ main.remove-padding {
   padding-bottom: 65px;
 }
 
+/*
+* OVERRIDING PRIMEVUE CSS
+*/
+.p-inputwrapper {
+  width: 100%;
+}
+input {
+  width: inherit;
+}
+
 @media screen and (max-width: 768px) {
   main {
     padding-top: 75px;

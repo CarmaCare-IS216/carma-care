@@ -1,6 +1,15 @@
 <script setup>
 import { useRoute } from 'vue-router'
 
+// router
+import router from '../../router'
+
+// stores
+import { useUserStore } from '../../stores/user'
+
+// primevue
+import Button from 'primevue/Button'
+
 // custom components
 import Logo from '@/components/Logo/Logo.vue'
 import NavBarLinks from './NavBarLinks.vue'
@@ -8,6 +17,7 @@ import NavCarmaCoins from '@/components/NavCarmaCoins.vue'
 import AvatarMenu from '@/components/AvatarMenu.vue'
 import NotificationButton from '@/components/NotificationButton.vue'
 
+const user = useUserStore()
 const route = useRoute()
 </script>
 
@@ -25,9 +35,21 @@ const route = useRoute()
     </template>
 
     <div class="nav-btns">
-      <NavCarmaCoins />
-      <AvatarMenu />
-      <NotificationButton />
+      <template v-if="route.name !== 'Login' && route.name !== 'Signup'">
+        <template v-if="user.currentUser === null">
+          <Button
+            label="Login"
+            severity="warning"
+            size="small"
+            @click="router.push({ name: 'Login' })"
+          />
+        </template>
+        <template v-else>
+          <NavCarmaCoins />
+          <AvatarMenu />
+          <NotificationButton />
+        </template>
+      </template>
     </div>
   </div>
 </template>

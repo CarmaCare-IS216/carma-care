@@ -8,11 +8,15 @@ import router from './router'
 
 // 3rd-party libraries
 import PrimeVue from 'primevue/config'
+import Toast from 'vue-toastification'
+// Import the CSS or use your own!
+import 'vue-toastification/dist/index.css'
 
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
 app.use(PrimeVue)
+app.use(Toast)
 
 app.mount('#app')

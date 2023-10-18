@@ -12,8 +12,13 @@ import CreateEditProfileView from '@/views/Profile/CreateEditProfileView.vue'
 
 import ChatroomView from '@/views/Chatroom/ChatroomView.vue'
 
+import AuthView from '@/views/Auth/AuthView.vue'
+
 // layouts
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+
+// stores
+import { useUserStore } from '../stores/user'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,7 +36,9 @@ const router = createRouter({
       name: 'Create Giveaway',
       component: CreateEditGiveawayView,
       meta: {
-        layout: DefaultLayout
+        layout: DefaultLayout,
+        requiresAuth: true,
+        requiresProfile: true
       }
     },
 
@@ -48,7 +55,9 @@ const router = createRouter({
       name: 'Create Request',
       component: CreateEditRequestView,
       meta: {
-        layout: DefaultLayout
+        layout: DefaultLayout,
+        requiresAuth: true,
+        requiresProfile: true
       }
     },
 
@@ -57,7 +66,9 @@ const router = createRouter({
       name: 'Profile',
       component: ProfileView,
       meta: {
-        layout: DefaultLayout
+        layout: DefaultLayout,
+        requiresAuth: true,
+        requiresProfile: true
       }
     },
     {
@@ -65,7 +76,10 @@ const router = createRouter({
       name: 'Create Profile',
       component: CreateEditProfileView,
       meta: {
-        layout: DefaultLayout
+        layout: DefaultLayout,
+        requiresAuth: true,
+        requiresProfile: false,
+        alreadyHaveProfile: true
       }
     },
 
@@ -73,6 +87,25 @@ const router = createRouter({
       path: '/chatroom',
       name: 'Chatroom',
       component: ChatroomView,
+      meta: {
+        layout: DefaultLayout,
+        requiresAuth: true,
+        requiresProfile: true
+      }
+    },
+
+    {
+      path: '/login',
+      name: 'Login',
+      component: AuthView,
+      meta: {
+        layout: DefaultLayout
+      }
+    },
+    {
+      path: '/signup',
+      name: 'Signup',
+      component: AuthView,
       meta: {
         layout: DefaultLayout
       }
@@ -87,6 +120,48 @@ const router = createRouter({
     //   component: () => import('../views/AboutView.vue')
     // }
   ]
+})
+
+async function getUser(next, key, redirectPath) {
+  const user = useUserStore()
+
+  console.log('user ', user.currentUser)
+
+  if (user[key] === null) {
+    next(redirectPath)
+  } else {
+    next()
+  }
+}
+
+async function getUserProfile(next) {
+  const user = useUserStore()
+  if (user.currentUser === null) {
+    next('/login')
+  }
+  user.fetchUserProfile(user.currentUser.id).then((data) => {
+    if (user.currentUser && data === null) {
+      next()
+    } else {
+      next('/')
+    }
+  })
+}
+
+// auth requirements
+router.beforeEach((to, from, next) => {
+  const currentUrl = from.fullPath
+
+  console.log(currentUrl)
+  if (to.meta.alreadyHaveProfile) {
+    getUserProfile(next)
+  } else if (to.meta.requiresProfile) {
+    getUser(next, 'profile', '/profile/create')
+  } else if (to.meta.requiresAuth) {
+    getUser(next, 'currentUser', '/login')
+  } else {
+    next()
+  }
 })
 
 export default router
