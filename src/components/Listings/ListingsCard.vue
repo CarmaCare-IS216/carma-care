@@ -122,12 +122,35 @@ else if (seconds>1){
             alt=""
           />
           <Tag
+            v-if="category=='Food'"
             id="tag"
             :value="category"
             style="
               margin: 2px, 0, 0, 5px;
               border: solid 1px black;
               color: orange;
+              background-color: white;
+            "
+          ></Tag>
+          <Tag
+            v-if="category=='Tuition'"
+            id="tag"
+            :value="category"
+            style="
+              margin: 2px, 0, 0, 5px;
+              border: solid 1px black;
+              color: #6aef42;
+              background-color: white;
+            "
+          ></Tag>
+          <Tag
+            v-if="category=='Apparel'"
+            id="tag"
+            :value="category"
+            style="
+              margin: 2px, 0, 0, 5px;
+              border: solid 1px black;
+              color: #679af1;
               background-color: white;
             "
           ></Tag>
