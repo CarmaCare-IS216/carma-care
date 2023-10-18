@@ -7,7 +7,7 @@ import Checkbox from 'primevue/checkbox';
 import Dropdown from 'primevue/Dropdown';
 
 
-
+defineEmits(["passQuery"])
 
 
 const tabletScreen = useMatchMedia(screenSize.tablet)
@@ -51,26 +51,57 @@ const selectedAllergens = ref();
 
 
 const submitFilter=()=>{
-    console.log(selectedCategories.value)
-    // console.log(selectedRestrictions.value.value)
-    // console.log(selectedAllergens.value.value)
+    var categoryFilter
+    var restrictionsFilter
+    var allergensFilter
+
+
+    var categoryCheckedBox=selectedCategories.value
+
+    if(categoryCheckedBox==null || categoryCheckedBox.length==0 || categoryCheckedBox.length==(categories.value).length){
+      // checked nothing/checked all
+      categoryFilter=[]
+      for(var category of categories.value.slice(1)){
+        categoryFilter.push(category.name)
+      }
+
+    }
+    else{
+      categoryFilter=categoryCheckedBox
+    }
+
+    restrictionsFilter=selectedRestrictions.value.value
+
+    var allergensCheckbox=selectedAllergens.value
+
+    if(allergensCheckbox==null||allergensCheckbox.length==0){
+      // checked nothing/
+      allergensFilter=""
+    }
+    else{
+      
+      allergensFilter=allergensCheckbox
+    }
+    
+    return {"categoryFilter":categoryFilter,"restrictionsFilter":restrictionsFilter,"allergensFilter":allergensFilter,}
 }
 
 const checkAll=()=>{
+    // check all boxes
     if(Object.values(selectedCategories.value).indexOf('All') > -1 && !allWasActive.value){
       selectedCategories.value.push("Food")
       selectedCategories.value.push("Apparel")
       selectedCategories.value.push("Tuition")
       allWasActive.value=true
       
+    // uncheck all boxes
+
     }else if(Object.values(selectedCategories.value).indexOf('All')==-1 && allWasActive.value){
-      console.log(111)
-      selectedCategories.value=[]
+      selectedCategories.value=undefined
       allWasActive.value=false
 
     }
 }
-
 </script>
 
 <template>
@@ -87,29 +118,31 @@ const checkAll=()=>{
       @click="visible = true"
     />
     <div class="card flex justify-content-center">
-        <Sidebar v-model:visible="visible" @hide="submitFilter">
+        <Sidebar v-model:visible="visible" @hide="$emit('passQuery',submitFilter())" >
             <h2>Filters</h2>
-            <div >
+            <div class="filters">
               <div v-for="category of categories" :key="category.key" class="flex align-items-center" >
                   <Checkbox  class="p-checkbox-checked" v-model="selectedCategories" :inputId="category.key" name="category" :value="category.name" @change="checkAll();checked=true"/>
-                  <label :for="category.key" :value="category.name">{{ category.name }}</label>
+                  <label class="label" :for="category.key" :value="category.name">{{ category.name }}</label>
               </div>
 
             </div>
 
-            <h2>Dietary Restrictions</h2>
             
             <div class="dietaryRestrictions">
+              <h2>Dietary Restrictions</h2>
+
                 <Dropdown v-model="selectedRestrictions" :options="dietaryRestrictions" optionLabel="name" placeholder="Select Restriction" class="w-full md:w-14rem" />
             </div>
 
-            <h2>Food Allergens</h2>
 
 
             <div class="allergens">
+              <h2>Food Allergens</h2>
+              
               <div v-for="allergen of allergens" :key="allergen.key" class="flex align-items-center">
                   <Checkbox v-model="selectedAllergens" :inputId="allergen.key" name="allergen" :value="allergen.name" />
-                  <label :for="allergen.key">{{ allergen.name }}</label>
+                  <label class="label" :for="allergen.key">{{ allergen.name }}</label>
               </div>
             </div>
 
@@ -118,4 +151,19 @@ const checkAll=()=>{
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.label{
+  margin-left: 10px;
+}
+.filters{
+  margin-top: 10px;
+}
+
+.dietaryRestrictions{
+  margin-top: 10px;
+}
+
+.allergens{
+  margin-top:10px
+}
+</style>

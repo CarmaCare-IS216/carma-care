@@ -24,7 +24,6 @@ const seconds = timeDifference / 1000;
 const minutes = seconds / 60;
 const hours = minutes / 60;
 const days = hours / 24;
-console.log(days)
 var timeDiff
 if (days > 1){
   if (days.toFixed(0)==1){
