@@ -1,6 +1,7 @@
 <script setup>
 import ListingsHeader from '../../components/Listings/ListingsHeader.vue'
 import ListingsCard from '../../components/Listings/ListingsCard.vue'
+
 import { supabase } from '@/lib/supabase'
 import { ref, onMounted } from 'vue'
 const default_data = ref([])
@@ -19,8 +20,8 @@ onMounted(() => {
     <div class="container listings-cards">
 
       <ListingsCard v-for="(item, index) in default_data" :key="index" :listingType=item.listingType :username=item.userProfiles.username
-        :avatarUrl=item.userProfiles.avatarUrl :postingTime=item.postingTime :locationAddress=locationAddress :category=item.category
-        :image=item.images :listingTitle=item.listingTitle :tags=item.tags :status=item.status
+        :avatarUrl=item.userProfiles.avatarUrl :postingTime=item.postingTime :locationAddress=item.locationAddress :category=item.category
+        :image=item.images[0] :listingTitle=item.listingTitle :tags=item.tags :status=item.status
         :quantityNum=item.quantityNum  />
 
     </div>

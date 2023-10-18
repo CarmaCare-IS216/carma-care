@@ -1,7 +1,5 @@
 <script setup>
 import { defineProps, toRefs } from 'vue'
-import Image from 'primevue/image'
-import { stringifyQuery } from 'vue-router'
 import Avatar from 'primevue/Avatar'
 import 'primeicons/primeicons.css'
 import Tag from 'primevue/tag'
@@ -22,7 +20,6 @@ const props = defineProps({
 const timeDifference = Date.now() - Date.parse(props.postingTime);
 
 // Calculate the time difference in different units
-const milliseconds = timeDifference;
 const seconds = timeDifference / 1000;
 const minutes = seconds / 60;
 const hours = minutes / 60;
@@ -31,35 +28,35 @@ console.log(days)
 var timeDiff
 if (days > 1){
   if (days.toFixed(0)==1){
-    timeDiff=days.toFixed(0) + " day"
+    timeDiff=days.toFixed(0) + " day ago"
   }
   else{
-    timeDiff=days.toFixed(0) + " days"
+    timeDiff=days.toFixed(0) + " days ago"
   }
 
 }
 else if (hours>1){
   if (hours.toFixed(0)==1){
-    timeDiff=hours.toFixed(0) + " hour"
+    timeDiff=hours.toFixed(0) + " hour ago"
   }
   else{
-    timeDiff=hours.toFixed(0) + " hours"
+    timeDiff=hours.toFixed(0) + " hours ago"
   }
 }
 else if (minutes>1){
   if (minutes.toFixed(0)==1){
-    timeDiff=minutes.toFixed(0) + " minute"
+    timeDiff=minutes.toFixed(0) + " minute ago"
   }
   else{
-    timeDiff=minutes.toFixed(0) + " minutes"
+    timeDiff=minutes.toFixed(0) + " minutes ago"
   }
 }
 else if (seconds>1){
   if (seconds.toFixed(0)==1){
-    timeDiff=seconds.toFixed(0) + " second"
+    timeDiff=seconds.toFixed(0) + " second ago"
   }
   else{
-    timeDiff=seconds.toFixed(0) + " seconds"
+    timeDiff=seconds.toFixed(0) + " seconds ago"
   }
 }
 </script>
@@ -106,7 +103,7 @@ else if (seconds>1){
           <div class="card-header-bottom">
             <span class="card-header-time">
               <!-- card header time goes in here -->
-              {{ timeDiff }} ago
+              {{ timeDiff }} 
             </span>
             <span class="card-header-location">
               <!-- card header location goes in here -->
@@ -163,7 +160,7 @@ else if (seconds>1){
 
 
 
-        <div class="card-item-servings" v-if="category=='food'">
+        <div class="card-item-servings" v-if="category=='Food'">
           <!-- card item servings goes in here -->
           <i class="pi pi-user"></i>
           {{ quantityNum }} servings
@@ -191,22 +188,31 @@ a {
   box-shadow: 0 7px 15px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   border: solid;
+  background-color: #d9d9d9;
 }
 
 #avatar {
   border-radius: 100%;
   margin: 5px 10px 5px 10px;
   display: flex;
+  background-color: white;
 }
 
 .card-header {
   display: flex;
   align-items: center;
+  
+}
+
+.card-header-time{
+
+  white-space: nowrap;
 }
 
 .card-header-content {
   width: 100%;
   margin-right:5px;
+  overflow: hidden;
 }
 
 
@@ -218,7 +224,9 @@ a {
 .card-header-bottom {
   color:grey;
   display: flex;
-  gap:10px
+  gap:10px;
+  width: 230.5px;
+  height: 25px;
 }
 
 .card-header-content {
