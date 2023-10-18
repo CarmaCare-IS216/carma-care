@@ -19,7 +19,7 @@ const profileInfo = ref({
   requests: 97,
   profilePhoto: "https://avatarfiles.alphacoders.com/342/342016.jpg",
   // profilePhoto: null,
-  dietaryRestrictions: ['Vegetarian', 'Halal'],
+  dietaryRestrictions: 'Halal',
   allergies: [],
 })
 var visible = ref(false);
@@ -32,7 +32,7 @@ let toggleModal = () => visible.value = !visible.value;
     <section class="profile">
       <div class="profile-content">
         <Avatar v-if="profileInfo.profilePhoto" :image=profileInfo.profilePhoto class="profile-photo" shape="circle" />
-        <Avatar v-else image="https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg" class="profile-photo" shape="circle" />
+        <Avatar v-else :label="`${profileInfo.fullName.charAt(0)}`" class="profile-photo" shape="circle" style="background-color: #4caf4f; color: #fff"/>
         <div class="profile-info">
           <div style="display: flex; justify-content: space-between; padding-bottom: 20px;">
             <div>
@@ -85,11 +85,8 @@ let toggleModal = () => visible.value = !visible.value;
   <div v-if="visible" class="modal" @click="toggleModal"></div>
   <Dialog :visible="visible" :header="`${profileInfo.fullName}'s Dietary Preferences`" :style="{ width: '50vw' }">
         <h3>Dietary Restrictions</h3>
-        <div v-if="profileInfo.dietaryRestrictions.length != 0">
-          <Tag v-for="(item, index) in profileInfo.dietaryRestrictions" :key="index"
-              class="category tag"
-              :value="item"
-          ></Tag>
+        <div v-if="profileInfo.dietaryRestrictions">
+          <Tag class="category tag" :value="profileInfo.dietaryRestrictions"></Tag>
         </div>
         <div v-else>
           <p>None</p>
