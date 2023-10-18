@@ -106,7 +106,7 @@ const checkAll=()=>{
 
 <template>
   <div v-if="tabletScreen">
-    <Button icon="pi pi-sliders-h" text rounded aria-label="Filter" @click="toggleFilterMenu" />
+    <Button icon="pi pi-sliders-h" text rounded aria-label="Filter" @click="visible = true" />
   </div>
   <div v-else>
     <Button
@@ -117,7 +117,9 @@ const checkAll=()=>{
       link
       @click="visible = true"
     />
-    <div class="card flex justify-content-center">
+    
+  </div>
+  <div class="card flex justify-content-center">
         <Sidebar v-model:visible="visible" @hide="$emit('passQuery',submitFilter())" >
             <h2>Filters</h2>
             <div class="filters">
@@ -148,7 +150,6 @@ const checkAll=()=>{
 
         </Sidebar>
     </div>
-  </div>
 </template>
 
 <style scoped>
