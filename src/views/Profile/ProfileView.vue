@@ -100,7 +100,7 @@ let toggleModal = () => visible.value = !visible.value;
     </section>
     <section class="my-listings">
       <TabsWrapper>
-        <Tab icon="pi-gift" title="Giveaways" @click="showLog">
+        <Tab icon="pi-gift" title="Giveaways">
           <div class="container pt-small">Giveaways</div>
         </Tab>
         <Tab icon="pi-megaphone" title="Requests">
