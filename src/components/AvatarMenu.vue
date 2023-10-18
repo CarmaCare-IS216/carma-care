@@ -70,6 +70,8 @@ const handleLogout = async () => {
   } else {
     console.log('Logout successfully')
     user.currentUser = null
+    user.session = null
+    user.profile = null
     router.push({ name: 'Login' })
     toast.success('Logged out successfully', {
       position: POSITION.TOP_CENTER,
@@ -84,14 +86,19 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
 <template>
   <div class="nav-btns-avatar-menu">
     <div class="nav-btns-avatar" @click="toggle">
-      <Avatar
-        label="P"
-        size="medium"
-        shape="circle"
-        style="background-color: #4caf4f; color: #fff"
-      />
+      <template v-if="user.profile !== null">
+        <Avatar
+          :label="user.profile?.username.charAt(0).toUpperCase()"
+          size="medium"
+          shape="circle"
+          style="background-color: #4caf4f; color: #fff"
+        />
+      </template>
+      <template v-else>
+        <Avatar icon="pi pi-user" size="medium" shape="circle" />
+      </template>
       <div v-if="!tabletScreen">
-        <span class="name">Peter Parker</span>
+        <span class="name">{{ user.profile?.username }}</span>
       </div>
     </div>
 

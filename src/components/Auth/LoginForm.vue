@@ -15,7 +15,10 @@ import Button from 'primevue/Button'
 // vue-toastification
 import { useToast, POSITION } from 'vue-toastification'
 
+import { useUserStore } from '../../stores/user'
+
 const toast = useToast()
+const user = useUserStore()
 
 const email = ref('')
 const password = ref('')
@@ -39,11 +42,19 @@ const handleLogin = async () => {
     email.value = ''
     password.value = ''
   } else {
-    console.log(data)
-    router.push({ name: 'Giveaways' })
-    toast.success('Logged in successfully', {
-      position: POSITION.TOP_CENTER,
-      timeout: 2000
+    await user.fetchUserProfile(data.user.id).then((data) => {
+      user.profile = data
+
+      if (data === null) {
+        router.push({ name: 'Create Profile' })
+      } else {
+        router.push({ name: 'Giveaways' })
+      }
+
+      toast.success('Logged in successfully', {
+        position: POSITION.TOP_CENTER,
+        timeout: 2000
+      })
     })
   }
 }
