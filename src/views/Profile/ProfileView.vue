@@ -6,22 +6,50 @@ import Button from 'primevue/Button';
 import Avatar from 'primevue/Avatar';
 import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue'
+import { LISTING_TYPE } from '../../util/constants'
 
-const showLog = () => console.log('helloooo')
+// supabase
+import { supabase } from '@/lib/supabase'
+
+// stores
+import { useUserStore } from '../../stores/user'
+
+// user info consts from db
+const user = useUserStore()
+const profileInfo = ref({})
+const num_giveaways = ref({})
+const num_requests = ref({})
+
+// fetch user listings from db for giveaway and request count
+async function getListings() {
+  // get all listings from this user
+  const { data, error } = await supabase.from('listings').select('*').eq('poster_id', profileInfo.value.id)
+
+  if (error) {
+    console.log('error: ', error)
+  } else {
+    console.log(data)
+    // filter out the giveaways and requests
+    var giveaways = data.filter(listing => {
+      return listing.listingType === LISTING_TYPE.Giveaway
+    })
+    var requests = data.filter(listing => {
+      return listing.listingType === LISTING_TYPE.Request
+    })
+    num_giveaways.value = giveaways.length
+    num_requests.value = requests.length
+  }
+}
+
+onMounted(() => {
+  profileInfo.value = user.profile
+  getListings()
+})
 
 const tabletScreen = useMatchMedia(screenSize.tablet)
-const profileInfo = ref({
-  fullName: 'Peter Parker',
-  username: '@peterparker',
-  description: 'Hello people!  I’m a student from SMU! It’s Singapore Management University in case you don’t know! I love to volunteer during my free time.  I also do giveaways as well. ',
-  giveaways: 186,
-  requests: 97,
-  profilePhoto: "https://avatarfiles.alphacoders.com/342/342016.jpg",
-  // profilePhoto: null,
-  dietaryRestrictions: 'Halal',
-  allergies: [],
-})
+
+// For modal
 var visible = ref(false);
 let toggleModal = () => visible.value = !visible.value;
 
@@ -31,13 +59,13 @@ let toggleModal = () => visible.value = !visible.value;
   <main class="remove-padding">
     <section class="profile">
       <div class="profile-content">
-        <Avatar v-if="profileInfo.profilePhoto" :image=profileInfo.profilePhoto class="profile-photo" shape="circle" />
-        <Avatar v-else :label="`${profileInfo.fullName.charAt(0)}`" class="profile-photo" shape="circle" style="background-color: #4caf4f; color: #fff"/>
+        <Avatar v-if="profileInfo.avatarUrl" :image=profileInfo.avatarUrl class="profile-photo" shape="circle" />
+        <Avatar v-else :label="`${profileInfo?.username ? profileInfo.username.charAt(0) : ''}`" class="profile-photo" shape="circle"/>
         <div class="profile-info">
           <div style="display: flex; justify-content: space-between; padding-bottom: 20px;">
             <div>
-              <h1>{{ profileInfo.fullName }}</h1>
-              <p style="color: var(--color-primary)">{{ profileInfo.username }}</p>
+              <h1>{{ profileInfo.username }}</h1>
+              <p style="color: var(--color-primary)">@{{ profileInfo.handle }}</p>
             </div>
             <Button type="button" class="edit-button" label="Edit Profile" icon="pi pi-cog"/>
           </div>
@@ -50,14 +78,14 @@ let toggleModal = () => visible.value = !visible.value;
               <div class="statistics-icon-wrapper">
                 <div><Button class="icon" icon="pi pi-star"/></div>
                 <div>
-                  <h3>{{ profileInfo.giveaways }}</h3>
+                  <h3>{{ num_giveaways }}</h3>
                   <p>Giveaways Made</p>
                 </div>
               </div>
               <div class="statistics-icon-wrapper">
                 <div><Button class="icon" icon="pi pi-download"/></div>
                 <div>
-                  <h3>{{ profileInfo.requests }}</h3>
+                  <h3>{{ num_requests }}</h3>
                   <p>Requests Made</p>
                 </div>
               </div>
@@ -83,7 +111,7 @@ let toggleModal = () => visible.value = !visible.value;
   </main>
 
   <div v-if="visible" class="modal" @click="toggleModal"></div>
-  <Dialog :visible="visible" :header="`${profileInfo.fullName}'s Dietary Preferences`" :style="{ width: '50vw' }">
+  <Dialog :visible="visible" :header="`${profileInfo.username}'s Dietary Preferences`" :style="{ width: '50vw' }">
         <h3>Dietary Restrictions</h3>
         <div v-if="profileInfo.dietaryRestrictions">
           <Tag class="category tag" :value="profileInfo.dietaryRestrictions"></Tag>
@@ -93,7 +121,7 @@ let toggleModal = () => visible.value = !visible.value;
         </div>
         <h3 style="margin-top: 10px">Allergies</h3>
         <div v-if="profileInfo.allergies.length != 0">
-          <Tag v-for="(item, index) in profileInfo.dietaryRestrictions" :key="index"
+          <Tag v-for="(item, index) in profileInfo.allergies" :key="index"
               class="category tag"
               :value="item"
           ></Tag>
@@ -164,7 +192,9 @@ let toggleModal = () => visible.value = !visible.value;
   border-radius: 200px;
   line-height: 200px;
   text-align: center;
-  font-size: 8rem;
+  font-size: 8em;
+  background-color: #4caf4f;
+  color: #fff;
 }
 .profile-info {
   grid-area: profile-info;
@@ -185,6 +215,7 @@ let toggleModal = () => visible.value = !visible.value;
   .profile-photo {
     height: 150px;
     width: 150px;
+    font-size: 6em;
   }
   .icon {
     display: none
