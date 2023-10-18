@@ -12,8 +12,11 @@ const user = useUserStore()
 onMounted(() => {
   supabase.auth.getSession().then(({ data }) => {
     if (data.session !== null) {
-      user.currentUser = data.user
+      user.currentUser = data.session.user
       user.session = data.session
+      user.fetchUserProfile(data.session.user.id).then((data) => {
+        user.profile = data
+      })
     }
   })
 

@@ -29,7 +29,7 @@ export const DIETARY_RESTRICTIONS = {
 }
 
 export const FOOD_ALLERGENS = {
-  None: null,
+  //   None: null,
   Milk: 'Milk',
   Eggs: 'Eggs',
   Fish: 'Fish',

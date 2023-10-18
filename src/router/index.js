@@ -37,7 +37,8 @@ const router = createRouter({
       component: CreateEditGiveawayView,
       meta: {
         layout: DefaultLayout,
-        requiresAuth: true
+        requiresAuth: true,
+        requiresProfile: true
       }
     },
 
@@ -55,7 +56,8 @@ const router = createRouter({
       component: CreateEditRequestView,
       meta: {
         layout: DefaultLayout,
-        requiresAuth: true
+        requiresAuth: true,
+        requiresProfile: true
       }
     },
 
@@ -65,7 +67,8 @@ const router = createRouter({
       component: ProfileView,
       meta: {
         layout: DefaultLayout,
-        requiresAuth: true
+        requiresAuth: true,
+        requiresProfile: true
       }
     },
     {
@@ -74,7 +77,9 @@ const router = createRouter({
       component: CreateEditProfileView,
       meta: {
         layout: DefaultLayout,
-        requiresAuth: true
+        requiresAuth: true,
+        requiresProfile: false,
+        alreadyHaveProfile: true
       }
     },
 
@@ -84,7 +89,8 @@ const router = createRouter({
       component: ChatroomView,
       meta: {
         layout: DefaultLayout,
-        requiresAuth: true
+        requiresAuth: true,
+        requiresProfile: true
       }
     },
 
@@ -116,19 +122,43 @@ const router = createRouter({
   ]
 })
 
-async function getUser(next) {
+async function getUser(next, key, redirectPath) {
   const user = useUserStore()
-  if (user.currentUser === null) {
-    next('/login')
+
+  console.log('user ', user.currentUser)
+
+  if (user[key] === null) {
+    next(redirectPath)
   } else {
     next()
   }
 }
 
+async function getUserProfile(next) {
+  const user = useUserStore()
+  if (user.currentUser === null) {
+    next('/login')
+  }
+  user.fetchUserProfile(user.currentUser.id).then((data) => {
+    if (user.currentUser && data === null) {
+      next()
+    } else {
+      next('/')
+    }
+  })
+}
+
 // auth requirements
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth) {
-    getUser(next)
+  const currentUrl = from.fullPath
+
+  console.log(currentUrl)
+  if (to.meta.alreadyHaveProfile) {
+    getUserProfile(next)
+  } else if (to.meta.requiresProfile) {
+    getUser(next, 'profile', '/profile/create')
+  } else if (to.meta.requiresAuth) {
+    getUser(next, 'currentUser', '/login')
   } else {
     next()
   }
