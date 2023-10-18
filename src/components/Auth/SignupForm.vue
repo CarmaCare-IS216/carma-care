@@ -7,10 +7,17 @@ import InputText from 'primevue/InputText'
 import Password from 'primevue/Password'
 import Button from 'primevue/Button'
 
+// vue-toastification
+import { useToast, POSITION } from 'vue-toastification'
+
+const toast = useToast()
+
 const email = ref('')
 const password = ref('')
+const loading = ref(false)
 
 const handleSignUp = async () => {
+  loading.value = true
   const { data, error } = await supabase.auth.signUp({
     email: email.value,
     password: password.value
@@ -18,9 +25,20 @@ const handleSignUp = async () => {
 
   if (error) {
     console.log(error)
+    toast.error(error.message, {
+      position: POSITION.TOP_CENTER,
+      timeout: 2000
+    })
   } else {
     console.log(data)
+    router.push({ name: 'Login' })
+    toast.success('Please check your email to verify your account', {
+      position: POSITION.TOP_CENTER,
+      timeout: false
+    })
   }
+
+  loading.value = false
 }
 
 const seeCurrentUser = async () => {
@@ -56,7 +74,7 @@ const seeCurrentUser = async () => {
         <label>Password</label>
       </span>
 
-      <Button label="Sign up" severity="warning" @click="handleSignUp" />
+      <Button :disabled="loading" label="Sign up" severity="warning" @click="handleSignUp" />
       <div class="login-container">
         <span>Already have an account?</span>
         <Button
