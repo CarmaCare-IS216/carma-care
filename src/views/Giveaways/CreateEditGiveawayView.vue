@@ -4,14 +4,15 @@ import router from '../../router'
 import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
 
 import CardContainer from '../../components/CardContainer/CardContainer.vue'
+import MultipleImageUpload from '../../components/MultipleImageUpload.vue'
 
-import Dialog from 'primevue/dialog';
+import Dialog from 'primevue/dialog'
 import Button from 'primevue/Button'
 import InputText from 'primevue/InputText'
 import Dropdown from 'primevue/Dropdown'
 import MultiSelect from 'primevue/multiselect'
 import Textarea from 'primevue/Textarea'
-import Chips from 'primevue/chips';
+import Chips from 'primevue/chips'
 
 import { supabase } from '../../lib/supabase'
 
@@ -20,60 +21,52 @@ import {
   DIETARY_RESTRICTIONS,
   FOOD_ALLERGENS,
   STATUS,
-  SERVING_SIZE, 
+  SERVING_SIZE,
   CATEGORY
 } from '../../util/constants'
 
-import { convertConstantsToDropdownOptions } from '../../util/helper' 
+import { convertConstantsToDropdownOptions } from '../../util/helper'
 
 // vue-toastification
 import { useToast, POSITION } from 'vue-toastification'
 
-
-import { useUserStore } from '../../stores/user'; 
+import { useUserStore } from '../../stores/user'
 
 const toast = useToast()
 const user = useUserStore()
 
+const isLoading = ref(false)
+const imageFiles = ref([])
+const showPreview = ref(false)
 const form = ref({
   posterID: user.currentUser.id,
   username: user.profile.username,
-  listingType: "", // (LISTING_TYPE.Request for CreateEditRequestView.vue)
-  listingTitle: "", 
-  status: "", 
-  category: "", 
+  listingType: '', // (LISTING_TYPE.Request for CreateEditRequestView.vue)
+  listingTitle: '',
+  status: '',
+  category: '',
   dietaryRestrictions: DIETARY_RESTRICTIONS.None,
-  foodAllergens: FOOD_ALLERGENS.None, 
-  tags: [ ],
-  description: "", 
-  images: [ ],
-  quantityNum: "",
-  locationAddress: "", 
-  locationDescription: ""
+  foodAllergens: FOOD_ALLERGENS.None,
+  tags: [],
+  description: '',
+  images: [],
+  quantityNum: '',
+  locationAddress: '',
+  locationDescription: ''
 })
 
-
-const giveawayTypeOptions = convertConstantsToDropdownOptions(LISTING_TYPE) 
-
-const statusOptions = convertConstantsToDropdownOptions(STATUS) 
-
-const allergensOptions = convertConstantsToDropdownOptions(FOOD_ALLERGENS) 
-
-const dietaryRestrictionsOptions = convertConstantsToDropdownOptions(DIETARY_RESTRICTIONS) 
-
-const servingsizeOptions = convertConstantsToDropdownOptions(SERVING_SIZE) 
-
-const categoryOptions = convertConstantsToDropdownOptions(CATEGORY) 
-
-const visible = ref(false);
+const giveawayTypeOptions = convertConstantsToDropdownOptions(LISTING_TYPE)
+const statusOptions = convertConstantsToDropdownOptions(STATUS)
+const allergensOptions = convertConstantsToDropdownOptions(FOOD_ALLERGENS)
+const dietaryRestrictionsOptions = convertConstantsToDropdownOptions(DIETARY_RESTRICTIONS)
+const servingsizeOptions = convertConstantsToDropdownOptions(SERVING_SIZE)
+const categoryOptions = convertConstantsToDropdownOptions(CATEGORY)
 
 const handleBackBtn = () => {
   router.go(-1)
 }
 
 const handleChangeCategoryOption = (event) => {
-  console.log('event ', event.value);
-
   if (event.value !== CATEGORY.Food) {
     form.value.quantityNum = 0
     form.value.foodAllergens = FOOD_ALLERGENS.None
@@ -81,41 +74,68 @@ const handleChangeCategoryOption = (event) => {
   }
 }
 
-console.log(giveawayTypeOptions) 
-
 const handleCreateGiveaway = async () => {
-  const { data, error } = await supabase
-    .from('listings')
-    .insert({
-      poster_id: user.currentUser.id,
-      listingType: form.value.listingType,
-      listingTitle: form.value.listingTitle,
-      status: form.value.status, 
-      category: form.value.category, 
-      dietaryRestrictions: form.value.dietaryRestrictions, 
-      allergens: form.value.foodAllergens, 
-      tags: form.value.tags, 
-      listingDesc: form.value.description, 
-      images: form.value.images, 
-      quantityNum: form.value.quantityNum, 
-      locationAddress: form.value.locationAddress,
-      locationDesc: form.value.locationDescription
-    })
+  isLoading.value = true
+  // Upload the images to a Supabase bucket
+  for (let image of imageFiles.value) {
+    const imageFileFormat = image.name.split('.')[1] // file format: .jpg/.jpeg/.png
+    const filename = `${user.currentUser.id}_${
+      image.name
+    }_${new Date().getTime()}.${imageFileFormat}`
+
+    const { data: imageUploadResponse, error: imageUploadError } = await supabase.storage
+      .from('listings')
+      .upload(filename, image.file, {
+        contentType: 'auto' // Automatically detect content type
+      })
+
+    if (imageUploadError) {
+      console.error('Image upload error:', imageUploadError)
+      continue // Skip to the next file on error
+    }
+
+    const { data: bucketFile } = supabase.storage
+      .from('listings')
+      .getPublicUrl(imageUploadResponse.path)
+
+    form.value.images.push(bucketFile.publicUrl)
+  }
+
+  const { data, error } = await supabase.from('listings').insert({
+    poster_id: user.currentUser.id,
+    listingType: form.value.listingType,
+    listingTitle: form.value.listingTitle,
+    status: form.value.status,
+    category: form.value.category,
+    dietaryRestrictions: form.value.dietaryRestrictions,
+    allergens: form.value.foodAllergens,
+    tags: form.value.tags,
+    listingDesc: form.value.description,
+    images: form.value.images,
+    quantityNum: form.value.quantityNum,
+    locationAddress: form.value.locationAddress,
+    locationDesc: form.value.locationDescription
+  })
 
   if (error) {
-    console.log("createGiveaway error: ", error)
+    console.log('createGiveaway error: ', error)
     toast.error('Created Giveaway unsuccessful', {
-      position: POSITION.TOP_CENTER,
-      timeout: 2000
+      position: POSITION.TOP_CENTER
     })
+    isLoading.value = false
   } else {
-    console.log(`${data} created`)
-    router.push({ name: "Giveaways" }) 
+    router.push({ name: 'Giveaways' })
     toast.success('Created Giveaway successfully', {
       position: POSITION.TOP_CENTER,
-      timeout: 2000
+      timeout: 5000
     })
   }
+
+  isLoading.value = false
+}
+
+const handleUploadImages = (images) => {
+  imageFiles.value = images.value
 }
 
 const tabletScreen = useMatchMedia(screenSize.tablet)
@@ -140,79 +160,88 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                 </span>
 
                 <div class="p-float-label giveaway-type">
-                <Dropdown
-                  v-model="form.listingType"
-                  :options="giveawayTypeOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="w-full" />
+                  <Dropdown
+                    v-model="form.listingType"
+                    :options="giveawayTypeOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-full"
+                  />
 
-                <label>Giveaway Type</label>
-              </div>
+                  <label>Giveaway Type</label>
+                </div>
 
-               <div class="p-float-label giveaway-category">
-                <Dropdown
-                  @change="handleChangeCategoryOption"
-                  v-model="form.category"
-                  :options="categoryOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="w-full" />
+                <div class="p-float-label giveaway-category">
+                  <Dropdown
+                    @change="handleChangeCategoryOption"
+                    v-model="form.category"
+                    :options="categoryOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-full"
+                  />
 
-                <label>Giveaway Category</label>
-              </div>
+                  <label>Giveaway Category</label>
+                </div>
 
                 <div class="p-float-label giveaway-status">
-                <Dropdown
-                  v-model="form.status"
-                  :options="statusOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="w-full" />
+                  <Dropdown
+                    v-model="form.status"
+                    :options="statusOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-full"
+                  />
 
-                <label for="dd-city">Giveaway Status</label>
-              </div>
+                  <label for="dd-city">Giveaway Status</label>
+                </div>
 
-              <div v-if="form.category === CATEGORY.Food" class="p-float-label giveaway-serving">
-                <Dropdown
-                  v-model="form.quantityNum"
-                  :options="servingsizeOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="w-full" />
+                <div v-if="form.category === CATEGORY.Food" class="p-float-label giveaway-serving">
+                  <Dropdown
+                    v-model="form.quantityNum"
+                    :options="servingsizeOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-full"
+                  />
 
-                <label>Serving Size</label>
-              </div>
+                  <label>Serving Size</label>
+                </div>
 
-              <div v-if="form.category === CATEGORY.Food" class="p-float-label giveaway-restrictions">
-                <Dropdown
-                  v-model="form.dietaryRestrictions"
-                  :options="dietaryRestrictionsOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="w-full" />
+                <div
+                  v-if="form.category === CATEGORY.Food"
+                  class="p-float-label giveaway-restrictions"
+                >
+                  <Dropdown
+                    v-model="form.dietaryRestrictions"
+                    :options="dietaryRestrictionsOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-full"
+                  />
 
-                <label>Dietary Restrictions</label>
-              </div>
+                  <label>Dietary Restrictions</label>
+                </div>
 
+                <div class="card p-fluid giveaway-tags">
+                  <span class="p-float-label">
+                    <Chips id="chips" v-model="form.tags" />
+                    <label for="chips">Tags</label>
+                  </span>
+                </div>
 
-              <div class="card p-fluid giveaway-tags">
-        <span class="p-float-label">
-            <Chips id="chips" v-model="form.tags" />
-            <label for="chips">Tags</label>
-        </span>
-    </div>
+                <div v-if="form.category === CATEGORY.Food" class="p-float-label">
+                  <MultiSelect
+                    display="chip"
+                    v-model="form.foodAllergens"
+                    :options="allergensOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-full"
+                  />
 
-    <div v-if="form.category === CATEGORY.Food" class="p-float-label">
-                <MultiSelect display="chip"
-                  v-model="form.foodAllergens"
-                  :options="allergensOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="w-full" />
-
-                <label>List of Allergens</label>
-              </div>
+                  <label>List of Allergens</label>
+                </div>
 
                 <span class="p-float-label giveaway-description">
                   <Textarea
@@ -229,7 +258,6 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
 
             <CardContainer title="Location Information">
               <div class="location-information">
-              
                 <span class="p-float-label location">
                   <InputText v-model="form.locationAddress" class="w-full" />
                   <label>Location Address</label>
@@ -245,17 +273,12 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                   />
                   <label>Location Description</label>
                 </span>
-
-
-
-                
               </div>
             </CardContainer>
 
             <CardContainer title="Photo Gallery">
               <div class="photo-gallery">
-                <p>Add in Photo Gallery content here</p>
-
+                <MultipleImageUpload @uploadImages="handleUploadImages" />
               </div>
             </CardContainer>
           </div>
@@ -266,28 +289,36 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
               icon="pi pi-eye"
               aria-label="Preview"
               rounded
-              @click="visible = true"
+              @click="showPreview = true"
             />
             <div class="next-prev-btn-container">
               <router-link to="">
                 <Button icon="pi pi-times" label="Cancel" rounded outlined @click="handleBackBtn" />
               </router-link>
-              <Button icon="pi pi-plus" label="Create" rounded @click="handleCreateGiveaway" />
+              <Button
+                icon="pi pi-plus"
+                label="Create"
+                rounded
+                :disabled="isLoading"
+                @click="handleCreateGiveaway"
+              />
             </div>
-
           </div>
         </form>
       </section>
     </div>
   </main>
   <!-- Dialog goes here -->
-  <Dialog v-model:visible="visible" modal header="DIALOG" :style="{ width: '50vw' }">
+  <Dialog v-model:visible="showPreview" modal header="DIALOG" :style="{ width: '50vw' }">
     <section class="preview">
-        <!-- Card goes here -->
-         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-          </p>
-      </section>
-        </Dialog>
+      <!-- Card goes here -->
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+        laboris nisi ut aliquip ex ea commodo consequat.
+      </p>
+    </section>
+  </Dialog>
 </template>
 
 <style scoped>
@@ -344,7 +375,7 @@ main {
   grid-area: giveaway-category;
 }
 .giveaway-serving {
-  grid-area: giveaway-serving ;
+  grid-area: giveaway-serving;
 }
 .giveaway-restrictions {
   grid-area: giveaway-restrictions;
@@ -376,7 +407,7 @@ main {
 *.Photo Gallery
 *************************/
 .photo-gallery {
-  margin-top: 20px;
+  /* margin-top: 20px; */
 }
 
 .btn-container {

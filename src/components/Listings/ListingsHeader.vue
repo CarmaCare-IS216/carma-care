@@ -12,11 +12,14 @@ const props = defineProps({
 })
 
 const { searchBarPlaceholder, createButtonRouteName } = toRefs(props)
+
+defineEmits(["passQuery"])
+
 </script>
 
 <template>
   <section class="listings-header">
-    <ListingsFilterButton />
+    <ListingsFilterButton @passQuery="(query)=>$emit('passQuery',query)"/>
     <ListingsSearchBar :placeholder="searchBarPlaceholder" />
     <ListingsCreateButton :routeName="createButtonRouteName" />
   </section>
