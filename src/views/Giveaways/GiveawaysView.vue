@@ -1,55 +1,25 @@
 <script setup>
 import ListingsHeader from '../../components/Listings/ListingsHeader.vue'
 import ListingsCard from '../../components/Listings/ListingsCard.vue'
-
+import { useUserStore } from '../../stores/user'
 import { supabase } from '@/lib/supabase'
 import { ref, onMounted } from 'vue'
 
 const queryData = ref([])
+const user = useUserStore()
+const currentUser=user.currentUser.id
+// grab user id
 
 onMounted(() => {
   getData(queryData)
 })
-</script>
 
-<!-- play with time data -->
-
-<template>
-  <main class="giveaways">
-    <ListingsHeader
-      @passQuery="async (query) =>queryData=await getFiltered(query) "
-      searchBarPlaceholder="Search Giveaways"
-      createButtonRouteName="Create Giveaway"
-    />
-    <div class="container listings-cards">
-      <ListingsCard
-        v-for="(item, index) in queryData"
-        :key="index"
-        :listingType="item.listingType"
-        :username="item.userProfiles.username"
-        :avatarUrl="item.userProfiles.avatarUrl"
-        :postingTime="item.postingTime"
-        :locationAddress="item.locationAddress"
-        :category="item.category"
-        :image="item.images[0]"
-        :listingTitle="item.listingTitle"
-        :tags="item.tags"
-        :status="item.status"
-        :quantityNum="item.quantityNum"
-      />
-    </div>
-  </main>
-</template>
-
-<style scoped></style>
-
-<script>
 async function getData(queryData) {
   // const columnsToSelect='listingType', 'username', 'postingTime', 'locationAddress', 'category', 'image', 'listingTitle', 'tags', 'quantityNum', 'quantityUnit'
   const { data, error } = await supabase
     .from('listings')
     .select(
-      'listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
+      'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
     )
 
   // : avatarUrl = item.avatarUrl
@@ -73,7 +43,7 @@ async function getFiltered(condition) {
   var query=supabase
     .from('listings')
     .select(
-      'listingType,allergens, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
+      'poster_id,listingID,listingType,allergens, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
     )
     
   query.in("category",categoryFilter)
@@ -99,9 +69,9 @@ async function getFiltered(condition) {
 
           if(data[record].allergens!=null){
             for(var allergen of allergensFilter){
-              console.log(allergen)
+              allergen=allergen.slice(3)
+
               if(data[record].allergens.includes(allergen)){
-                console.log("removed ", record)
                 noAllergens=false
                 break
               }
@@ -124,4 +94,73 @@ async function getFiltered(condition) {
   }
 }
 
+async function search(searchData) {
+  if(searchData==undefined){
+    searchData=""
+  }
+  if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+  }
+  this.timer = setTimeout(async () => {
+      // your code
+      // const columnsToSelect='listingType', 'username', 'postingTime', 'locationAddress', 'category', 'image', 'listingTitle', 'tags', 'quantityNum', 'quantityUnit'
+      const { data, error } = await supabase
+        .from('listings')
+        .select(
+          'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
+        ).ilike("listingTitle","%"+searchData+"%")
+
+
+      if (error) {
+        console.log('error: ', error)
+        // handle the error
+      } else {
+        // do something with the data (e.g. assign data to an array ref)
+        queryData.value=data
+      }
+
+
+  }, 300);
+
+}
+
+
+
+
+
 </script>
+
+<!-- play with time data -->
+
+<template>
+  <main class="giveaways">
+    <ListingsHeader
+      @passQuery="async (query) =>queryData=await getFiltered(query) "
+      @passSearch='async (query) =>queryData=await search(query)'
+      searchBarPlaceholder="Search Giveaways"
+      createButtonRouteName="Create Giveaway"
+    />
+    <div class="container listings-cards">
+      <ListingsCard
+        v-for="item in queryData"
+        :key="item.listingID"
+        :listingType="item.listingType"
+        :username="item.userProfiles.username"
+        :avatarUrl="item.userProfiles.avatarUrl"
+        :postingTime="item.postingTime"
+        :locationAddress="item.locationAddress"
+        :category="item.category"
+        :image="item.images[0]"
+        :listingTitle="item.listingTitle"
+        :tags="item.tags"
+        :status="item.status"
+        :quantityNum="item.quantityNum"
+        :isPoster="item.poster_id==currentUser"
+      />
+    </div>
+  </main>
+</template>
+
+<style scoped></style>
+

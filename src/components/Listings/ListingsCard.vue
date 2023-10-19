@@ -14,7 +14,8 @@ const props = defineProps({
   listingTitle: String,
   tags: Array,
   status: String,
-  quantityNum: Number
+  quantityNum: Number,
+  isPoster:Boolean
 })
 // Calculate the time difference in milliseconds
 const timeDifference = Date.now() - Date.parse(props.postingTime);
@@ -93,7 +94,7 @@ else if (seconds>1){
               <!-- card header name goes in here -->
               {{ username }}
             </span>
-            <div class="card-header-edit-btn">
+            <div v-if="isPoster" class="card-header-edit-btn">
               <!-- card header edit button goes in here -->
               <i class="pi pi-file-edit" style="font-size: larger; margin-right: 2px"></i>
             </div>
