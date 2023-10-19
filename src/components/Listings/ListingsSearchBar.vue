@@ -36,8 +36,3 @@ defineEmits(['passSearch'])
 }
 </style>
 
-<script>
-
-
-
-</script>
