@@ -93,10 +93,10 @@ else if (seconds>1){
               <!-- card header name goes in here -->
               {{ username }}
             </span>
-            <div class="card-header-edit-btn">
+            <!-- <div class="card-header-edit-btn"> -->
               <!-- card header edit button goes in here -->
-              <i class="pi pi-file-edit" style="font-size: larger; margin-right: 2px"></i>
-            </div>
+              <!-- <i class="pi pi-file-edit" style="font-size: larger; margin-right: 2px"></i>
+            </div> -->
           </div>
 
           <div class="card-header-bottom">

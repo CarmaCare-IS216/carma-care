@@ -24,7 +24,7 @@ onMounted(() => {
     <div class="container listings-cards">
       <ListingsCard
         v-for="(item, index) in queryData"
-        :key="index"
+        :key="item.listingID"
         :listingType="item.listingType"
         :username="item.userProfiles.username"
         :avatarUrl="item.userProfiles.avatarUrl"
@@ -49,7 +49,7 @@ async function getData(queryData) {
   const { data, error } = await supabase
     .from('listings')
     .select(
-      'listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
+      'listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
     )
 
   // : avatarUrl = item.avatarUrl
@@ -73,7 +73,7 @@ async function getFiltered(condition) {
   var query=supabase
     .from('listings')
     .select(
-      'listingType,allergens, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
+      'listingID,listingType,allergens, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
     )
     
   query.in("category",categoryFilter)
@@ -99,7 +99,6 @@ async function getFiltered(condition) {
 
           if(data[record].allergens!=null){
             for(var allergen of allergensFilter){
-              console.log(allergen)
               if(data[record].allergens.includes(allergen)){
                 console.log("removed ", record)
                 noAllergens=false
