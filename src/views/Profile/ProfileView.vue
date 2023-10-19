@@ -60,7 +60,7 @@ let toggleModal = () => visible.value = !visible.value;
     <section class="profile">
       <div class="profile-content">
         <Avatar v-if="profileInfo.avatarUrl" :image=profileInfo.avatarUrl class="profile-photo" shape="circle" />
-        <Avatar v-else :label="`${profileInfo?.username ? profileInfo.username.charAt(0) : ''}`" class="profile-photo" shape="circle"/>
+        <Avatar v-else :label="`${profileInfo?.username ? profileInfo.username.charAt(0).toUpperCase() : ''}`" class="profile-photo" shape="circle"/>
         <div class="profile-info">
           <div style="display: flex; justify-content: space-between; padding-bottom: 20px;">
             <div>
