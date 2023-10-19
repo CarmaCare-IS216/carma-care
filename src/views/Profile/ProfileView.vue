@@ -1,24 +1,57 @@
 <script setup>
 import Tab from '../../components/Tab/Tab.vue'
 import TabsWrapper from '../../components/Tab/TabsWrapper.vue'
-import Button from 'primevue/Button';
 import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
+import Button from 'primevue/Button';
 import Avatar from 'primevue/Avatar';
+import Dialog from 'primevue/dialog';
+import Tag from 'primevue/tag';
+import { ref, onMounted } from 'vue'
+import { LISTING_TYPE } from '../../util/constants'
 
-import { ref } from 'vue'
+// supabase
+import { supabase } from '@/lib/supabase'
 
-const showLog = () => console.log('helloooo')
+// stores
+import { useUserStore } from '../../stores/user'
+
+// user info consts from db
+const user = useUserStore()
+const profileInfo = ref({})
+const num_giveaways = ref({})
+const num_requests = ref({})
+
+// fetch user listings from db for giveaway and request count
+async function getListings() {
+  // get all listings from this user
+  const { data, error } = await supabase.from('listings').select('*').eq('poster_id', profileInfo.value.id)
+
+  if (error) {
+    console.log('error: ', error)
+  } else {
+    console.log(data)
+    // filter out the giveaways and requests
+    var giveaways = data.filter(listing => {
+      return listing.listingType === LISTING_TYPE.Giveaway
+    })
+    var requests = data.filter(listing => {
+      return listing.listingType === LISTING_TYPE.Request
+    })
+    num_giveaways.value = giveaways.length
+    num_requests.value = requests.length
+  }
+}
+
+onMounted(() => {
+  profileInfo.value = user.profile
+  getListings()
+})
+
 const tabletScreen = useMatchMedia(screenSize.tablet)
 
-const profileInfo = ref({
-  name: 'Peter Parker',
-  username: '@peterparker',
-  description: 'Hello people!  I’m a student from SMU! It’s Singapore Management University in case you don’t know! I love to volunteer during my free time.  I also do giveaways as well. ',
-  giveaways: 186,
-  requests: 97,
-  profilePhoto: "https://avatarfiles.alphacoders.com/342/342016.jpg",
-  // profilePhoto: null,
-})
+// For modal
+var visible = ref(false);
+let toggleModal = () => visible.value = !visible.value;
 
 </script>
 
@@ -26,18 +59,18 @@ const profileInfo = ref({
   <main class="remove-padding">
     <section class="profile">
       <div class="profile-content">
-        <Avatar v-if="profileInfo.profilePhoto" :image=profileInfo.profilePhoto class="profile-photo" shape="circle" />
-        <Avatar v-else image="https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg" class="profile-photo" shape="circle" />
+        <Avatar v-if="profileInfo.avatarUrl" :image=profileInfo.avatarUrl class="profile-photo" shape="circle" />
+        <Avatar v-else :label="`${profileInfo?.username ? profileInfo.username.charAt(0).toUpperCase() : ''}`" class="profile-photo" shape="circle"/>
         <div class="profile-info">
           <div style="display: flex; justify-content: space-between; padding-bottom: 20px;">
             <div>
-              <h1>{{ profileInfo.name }}</h1>
-              <p>{{ profileInfo.username }}</p>
+              <h1>{{ profileInfo.username }}</h1>
+              <p style="color: var(--color-primary)">@{{ profileInfo.handle }}</p>
             </div>
             <Button type="button" class="edit-button" label="Edit Profile" icon="pi pi-cog"/>
           </div>
           <p style="padding-bottom: 20px;">{{ profileInfo.description }}</p>
-          <Button class="dietary-restrictions">Dietary Restrictions</Button>
+          <Button class="dietary-restrictions" @click="visible = true">Dietary Preferences</Button>
         </div>
         <div class="profile-statistics">
           <div style="width: fill-available; display: flex; align-items: center; justify-content: space-between;">
@@ -45,14 +78,14 @@ const profileInfo = ref({
               <div class="statistics-icon-wrapper">
                 <div><Button class="icon" icon="pi pi-star"/></div>
                 <div>
-                  <h3>{{ profileInfo.giveaways }}</h3>
+                  <h3>{{ num_giveaways }}</h3>
                   <p>Giveaways Made</p>
                 </div>
               </div>
               <div class="statistics-icon-wrapper">
                 <div><Button class="icon" icon="pi pi-download"/></div>
                 <div>
-                  <h3>{{ profileInfo.requests }}</h3>
+                  <h3>{{ num_requests }}</h3>
                   <p>Requests Made</p>
                 </div>
               </div>
@@ -67,7 +100,7 @@ const profileInfo = ref({
     </section>
     <section class="my-listings">
       <TabsWrapper>
-        <Tab icon="pi-gift" title="Giveaways" @click="showLog">
+        <Tab icon="pi-gift" title="Giveaways">
           <div class="container pt-small">Giveaways</div>
         </Tab>
         <Tab icon="pi-megaphone" title="Requests">
@@ -76,10 +109,30 @@ const profileInfo = ref({
       </TabsWrapper>
     </section>
   </main>
+
+  <div v-if="visible" class="modal" @click="toggleModal"></div>
+  <Dialog :visible="visible" :header="`${profileInfo.username}'s Dietary Preferences`" :style="{ width: '50vw' }">
+        <h3>Dietary Restrictions</h3>
+        <div v-if="profileInfo.dietaryRestrictions">
+          <Tag class="category tag" :value="profileInfo.dietaryRestrictions"></Tag>
+        </div>
+        <div v-else>
+          <p>None</p>
+        </div>
+        <h3 style="margin-top: 10px">Allergies</h3>
+        <div v-if="profileInfo.allergies.length != 0">
+          <Tag v-for="(item, index) in profileInfo.allergies" :key="index"
+              class="category tag"
+              :value="item"
+          ></Tag>
+        </div>
+        <div v-else>
+          <p>None</p>
+        </div>
+    </Dialog>
 </template>
 
 <style scoped>
-
 .statistics-icon-wrapper {
   display: flex;
   width: 150px;
@@ -88,13 +141,24 @@ const profileInfo = ref({
   margin-right: 20px;
 }
 .statistics-button {
-  background:white;
-  color: black;
+  background: none;
+  color: var(--color-primary);
   border-radius: 100px;
-  border-color: black;
+  border-color: var(--color-primary);
+}
+.modal {
+  top: 0;
+  position: fixed;
+  background: rgba(0,0,0,0.5);
+  width: 100%;
+  height: 100%;
+}
+.tag {
+  background-color: var(--color-primary);
+  margin-right: 5px;
 }
 .edit-button {
-  background:grey;
+  background: var(--color-primary);
   color: white;
   border-radius: 100px;
   border: none;
@@ -120,7 +184,6 @@ const profileInfo = ref({
   width: 600px;
   justify-content: center;
 }
-
 .profile-photo {
   grid-area: profile-photo;
   background: darkgray;
@@ -129,7 +192,9 @@ const profileInfo = ref({
   border-radius: 200px;
   line-height: 200px;
   text-align: center;
-  font-size: 8rem;
+  font-size: 8em;
+  background-color: #4caf4f;
+  color: #fff;
 }
 .profile-info {
   grid-area: profile-info;
@@ -137,7 +202,6 @@ const profileInfo = ref({
 }
 .profile-statistics {
   grid-area: statistics;
-  /* background: plum; */
 }
 
 @media only screen and (max-width: 768px) {
@@ -151,6 +215,7 @@ const profileInfo = ref({
   .profile-photo {
     height: 150px;
     width: 150px;
+    font-size: 6em;
   }
   .icon {
     display: none
@@ -163,7 +228,7 @@ const profileInfo = ref({
   }
 }
 Button.icon {
-  background: lightgray;
+  background: rgba(246,132,56,0.75);
   color:black;
   border-radius: 100%;
   outline: none;
@@ -171,8 +236,8 @@ Button.icon {
   margin-right: 15px;
 }
 Button.dietary-restrictions {
-  color:black;
-  border-color: black;
+  color:var(--color-primary);
+  border-color: var(--color-primary);
   background: none;
   border-radius: 50px;
   outline: none;
