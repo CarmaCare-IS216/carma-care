@@ -31,18 +31,18 @@ const dietaryRestrictions = ref([
 ])
 
 const allergens = ref([
-  { name: 'Milk', key: 'Milk' },
-  { name: 'Eggs', key: 'Eggs' },
-  { name: 'Fish', key: 'Fish' },
-  { name: 'Shellfish', key: 'Shellfish' },
-  { name: 'Almonds', key: 'Almonds' },
-  { name: 'Walnuts', key: 'Walnuts' },
-  { name: 'Peanuts', key: 'Peanuts' },
-  { name: 'Wheat', key: 'Wheat' },
-  { name: 'Soy', key: 'Soy' },
-  { name: 'Sesame', key: 'Sesame' },
-  { name: 'Garlic', key: 'Garlic' },
-  { name: 'Onions', key: 'Onions' }
+  { name: 'No Milk', key: 'Milk' },
+  { name: 'No Eggs', key: 'Eggs' },
+  { name: 'No Fish', key: 'Fish' },
+  { name: 'No Shellfish', key: 'Shellfish' },
+  { name: 'No Almonds', key: 'Almonds' },
+  { name: 'No Walnuts', key: 'Walnuts' },
+  { name: 'No Peanuts', key: 'Peanuts' },
+  { name: 'No Wheat', key: 'Wheat' },
+  { name: 'No Soy', key: 'Soy' },
+  { name: 'No Sesame', key: 'Sesame' },
+  { name: 'No Garlic', key: 'Garlic' },
+  { name: 'No Onions', key: 'Onions' }
 ])
 const selectedAllergens = ref()
 
@@ -87,6 +87,8 @@ const submitFilter = () => {
 
 const checkAll = () => {
   // check all boxes
+  checked.value = true
+
   if (Object.values(selectedCategories.value).indexOf('All') > -1 && !allWasActive.value) {
     selectedCategories.value.push('Food')
     selectedCategories.value.push('Apparel')
@@ -137,8 +139,7 @@ const checkAll = () => {
             name="category"
             :value="category.name"
             @change="
-              checkAll();
-              checked = true
+              checkAll()
             "
           />
           <label class="label" :for="category.key" :value="category.name">{{

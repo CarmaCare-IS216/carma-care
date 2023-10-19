@@ -1,7 +1,7 @@
 <script setup>
 import ListingsHeader from '../../components/Listings/ListingsHeader.vue'
 import ListingsCard from '../../components/Listings/ListingsCard.vue'
-
+import { useUserStore } from '../../stores/user'
 import { supabase } from '@/lib/supabase'
 import { ref, onMounted } from 'vue'
 
@@ -18,12 +18,13 @@ onMounted(() => {
   <main class="giveaways">
     <ListingsHeader
       @passQuery="async (query) =>queryData=await getFiltered(query) "
+      @passSearch='async (query) =>queryData=await search(query)'
       searchBarPlaceholder="Search Giveaways"
       createButtonRouteName="Create Giveaway"
     />
     <div class="container listings-cards">
       <ListingsCard
-        v-for="(item, index) in queryData"
+        v-for="item in queryData"
         :key="item.listingID"
         :listingType="item.listingType"
         :username="item.userProfiles.username"
@@ -44,6 +45,8 @@ onMounted(() => {
 <style scoped></style>
 
 <script>
+
+
 async function getData(queryData) {
   // const columnsToSelect='listingType', 'username', 'postingTime', 'locationAddress', 'category', 'image', 'listingTitle', 'tags', 'quantityNum', 'quantityUnit'
   const { data, error } = await supabase
@@ -99,6 +102,8 @@ async function getFiltered(condition) {
 
           if(data[record].allergens!=null){
             for(var allergen of allergensFilter){
+              allergen=allergen.slice(3)
+
               if(data[record].allergens.includes(allergen)){
                 console.log("removed ", record)
                 noAllergens=false
@@ -122,5 +127,39 @@ async function getFiltered(condition) {
 
   }
 }
+
+async function search(searchData) {
+  if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+  }
+  this.timer = setTimeout(() => {
+      // your code
+      console.log(searchData)
+
+      // const columnsToSelect='listingType', 'username', 'postingTime', 'locationAddress', 'category', 'image', 'listingTitle', 'tags', 'quantityNum', 'quantityUnit'
+      // const { data, error } = await supabase
+      //   .from('listings')
+      //   .select(
+      //     'listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
+      //   )
+
+      // // : avatarUrl = item.avatarUrl
+
+      // if (error) {
+      //   console.log('error: ', error)
+      //   // handle the error
+      // } else {
+      //   // do something with the data (e.g. assign data to an array ref)
+      //   queryData.value=data
+
+      // }
+
+
+  }, 800);
+
+}
+
+
 
 </script>

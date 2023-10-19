@@ -14,12 +14,12 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
 <template>
   <div v-if="tabletScreen">
     <router-link :to="{ name: routeName }">
-      <Button icon="pi pi-plus" rounded aria-label="Create" />
+      <Button icon="pi pi-plus" rounded aria-label="Create" severity="warning" />
     </router-link>
   </div>
   <div v-else>
     <router-link :to="{ name: routeName }">
-      <Button icon="pi pi-plus" label="Create" rounded />
+      <Button icon="pi pi-plus" label="Create" rounded severity="warning" />
     </router-link>
   </div>
 </template>
