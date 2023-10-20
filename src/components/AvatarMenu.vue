@@ -86,7 +86,10 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
 <template>
   <div class="nav-btns-avatar-menu">
     <div class="nav-btns-avatar" @click="toggle">
-      <template v-if="user.profile !== null">
+      <template v-if="user.profile?.avatarUrl">
+        <Avatar :image="user.profile?.avatarUrl" size="medium" shape="circle" />
+      </template>
+      <template v-else-if="user.profile !== null">
         <Avatar
           :label="user.profile?.username.charAt(0).toUpperCase()"
           size="medium"
