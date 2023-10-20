@@ -7,7 +7,7 @@ import { ref, onMounted } from 'vue'
 
 const queryData = ref([])
 const user = useUserStore()
-const currentUser=user.currentUser.id
+const currentUser=user.currentUser?.id
 // grab user id
 
 onMounted(() => {
