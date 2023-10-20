@@ -121,6 +121,11 @@ const handleDrop = (event) => {
   -webkit-user-select: none;
 }
 
+.image-upload .drag-area > span {
+  margin: 0 40px;
+  text-align: center;
+}
+
 .image-upload .drag-area .visible {
   font-size: 1em;
 }
@@ -139,15 +144,15 @@ const handleDrop = (event) => {
 .image-upload .upload-thumbnail-container {
   width: 100%;
   height: auto;
-  display: flex;
   gap: 10px;
-  justify-content: flex-start;
-  align-items: flex-start;
   flex-wrap: wrap;
-  max-height: 200px;
   position: relative;
   margin-bottom: 8px;
-  padding-top: 15px;
+  padding-top: 30px;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  justify-items: center;
 }
 
 .image-upload .upload-thumbnail-container .image {
@@ -173,7 +178,7 @@ const handleDrop = (event) => {
   right: 6px;
   font-size: 1.3em;
   cursor: pointer;
-  z-index: 99;
+  z-index: 1;
   color: white;
   background: var(--color-primary);
   width: 25px;

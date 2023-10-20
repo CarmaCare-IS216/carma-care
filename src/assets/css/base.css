@@ -73,4 +73,9 @@ input {
     padding-top: 75px;
     /* padding-bottom: 80px; */
   }
+
+  .container {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }

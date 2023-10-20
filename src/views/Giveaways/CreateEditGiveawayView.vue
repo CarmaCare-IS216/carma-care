@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import router from '../../router'
 import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
 
+import ListingsCard from '../../components/Listings/ListingsCard.vue'
 import CardContainer from '../../components/CardContainer/CardContainer.vue'
 import MultipleImageUpload from '../../components/MultipleImageUpload.vue'
 
@@ -41,7 +42,7 @@ const showPreview = ref(false)
 const form = ref({
   posterID: user.currentUser.id,
   username: user.profile.username,
-  listingType: '', // (LISTING_TYPE.Request for CreateEditRequestView.vue)
+  listingType: LISTING_TYPE.Giveaway, // (LISTING_TYPE.Request for CreateEditRequestView.vue)
   listingTitle: '',
   status: '',
   category: '',
@@ -68,7 +69,7 @@ const handleBackBtn = () => {
 
 const handleChangeCategoryOption = (event) => {
   if (event.value !== CATEGORY.Food) {
-    form.value.quantityNum = 0
+    form.value.quantityNum = ''
     form.value.foodAllergens = FOOD_ALLERGENS.None
     form.value.dietaryRestrictions = DIETARY_RESTRICTIONS.None
   }
@@ -146,7 +147,21 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
     <div class="container container-narrow container-create-edit-giveaway">
       <section class="preview">
         <!-- Card goes here -->
-        Preview Card
+        <p class="preview-title">Preview Card</p>
+        <ListingsCard
+          :listingType="form.listingType"
+          :username="user.profile.username"
+          :avatarUrl="user.profile.avatarUrl"
+          :postingTime="null"
+          :locationAddress="form.locationAddress"
+          :category="form.category"
+          :image="form.images?.[0] ?? imageFiles[0]?.url"
+          :listingTitle="form.listingTitle"
+          :tags="form.tags"
+          :status="form.status"
+          :quantityNum="form.quantityNum"
+          :isPoster="true"
+        />
       </section>
 
       <section class="form-container">
@@ -159,7 +174,7 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                   <label>Giveaway Title</label>
                 </span>
 
-                <div class="p-float-label giveaway-type">
+                <!-- <div class="p-float-label giveaway-type">
                   <Dropdown
                     v-model="form.listingType"
                     :options="giveawayTypeOptions"
@@ -169,7 +184,7 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                   />
 
                   <label>Giveaway Type</label>
-                </div>
+                </div> -->
 
                 <div class="p-float-label giveaway-category">
                   <Dropdown
@@ -230,7 +245,10 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                   </span>
                 </div>
 
-                <div v-if="form.category === CATEGORY.Food" class="p-float-label">
+                <div
+                  v-if="form.category === CATEGORY.Food"
+                  class="p-float-label giveaway-allergens"
+                >
                   <MultiSelect
                     display="chip"
                     v-model="form.foodAllergens"
@@ -309,25 +327,40 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
     </div>
   </main>
   <!-- Dialog goes here -->
-  <Dialog v-model:visible="showPreview" modal header="DIALOG" :style="{ width: '50vw' }">
-    <section class="preview">
-      <!-- Card goes here -->
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-        laboris nisi ut aliquip ex ea commodo consequat.
-      </p>
-    </section>
+  <Dialog v-model:visible="showPreview" modal header="Listing Preview" class="preview-dialog">
+    <ListingsCard
+      :listingType="form.listingType"
+      :username="user.profile.username"
+      :avatarUrl="user.profile.avatarUrl"
+      :postingTime="null"
+      :locationAddress="form.locationAddress"
+      :category="form.category"
+      :image="form.images?.[0] ?? imageFiles[0]?.url"
+      :listingTitle="form.listingTitle"
+      :tags="form.tags"
+      :status="form.status"
+      :quantityNum="form.quantityNum"
+      :isPoster="true"
+    />
   </Dialog>
 </template>
 
 <style scoped>
+.p-overflow-hidden {
+  overflow: auto;
+}
+
 main {
   padding: unset;
 }
 .container-create-edit-giveaway {
   max-width: 1150px;
   padding-top: 25px;
+}
+
+.preview-title {
+  margin-bottom: 20px;
+  font-size: 1.3em;
 }
 .preview-btn-container {
   display: none;
@@ -336,9 +369,13 @@ main {
 .preview {
   position: sticky;
   width: var(--preview-card-width);
-  background: red;
-  padding: 30px;
-  top: 113px;
+  /* background: red; */
+  padding-left: 30px;
+  top: 125px;
+}
+
+.form-container {
+  margin-top: -300px;
 }
 
 .form-container form {
@@ -352,45 +389,62 @@ main {
 *************************/
 .giveaway-information {
   margin-top: 20px;
-  display: grid;
+  /* display: grid;
   grid-template-areas:
     'giveaway-name        giveaway-name'
-    'giveaway-type        giveaway-status'
-    'giveaway-category  giveaway-category'
+    'giveaway-category    giveaway-status'
     'giveaway-serving     giveaway-serving'
     'giveaway-restrictions giveaway-restrictions'
     'giveaway-tags        giveaway-tags'
     'giveaway-allergens   giveaway-allergens'
-    'giveaway-description giveaway-description';
+    'giveaway-description giveaway-description'; */
+  display: flex;
+  flex-wrap: wrap;
   gap: 40px;
 }
 .giveaway-name {
   grid-area: giveaway-name;
-  width: 100%;
+  /* width: 100%; */
+  flex: 100%;
 }
-.giveaway-type {
+/* .giveaway-type {
   grid-area: giveaway-type;
-}
+} */
 .giveaway-category {
   grid-area: giveaway-category;
-}
-.giveaway-serving {
-  grid-area: giveaway-serving;
-}
-.giveaway-restrictions {
-  grid-area: giveaway-restrictions;
+  /* width: 50%; */
+  flex: 40%;
 }
 .giveaway-status {
   grid-area: giveaway-status;
+  /* width: 50%; */
+  flex: 40%;
 }
+.giveaway-serving {
+  grid-area: giveaway-serving;
+  /* width: 100%; */
+  flex: 100%;
+}
+.giveaway-restrictions {
+  grid-area: giveaway-restrictions;
+  /* width: 100%; */
+  flex: 100%;
+}
+
 .giveaway-tags {
   grid-area: giveaway-tags;
+  /* width: 100%; */
+  flex: 100%;
 }
 .giveaway-allergens {
   grid-area: giveaway-allergens;
+  /* width: 100%; */
+  flex: 100%;
 }
 .giveaway-description {
   grid-area: giveaway-description;
+  /* width: 100%; */
+  flex: 100%;
 }
 
 /*************************
@@ -420,6 +474,7 @@ main {
   box-shadow: 0 -7px 30px rgba(0, 0, 0, 0.075);
   width: inherit;
   padding: 15px;
+  z-index: 999;
 }
 .next-prev-btn-container {
   display: flex;
@@ -445,6 +500,34 @@ main {
 
   .btn-container {
     justify-content: space-between;
+  }
+
+  .form-container {
+    margin-top: 0px;
+  }
+
+  .giveaway-information {
+    /* grid-template-areas:
+      'giveaway-name'
+      'giveaway-status'
+      'giveaway-category'
+      'giveaway-serving'
+      'giveaway-restrictions'
+      'giveaway-tags'
+      'giveaway-allergens'
+      'giveaway-description'; */
+    gap: 40px;
+  }
+
+  .giveaway-category {
+    grid-area: giveaway-category;
+    /* width: 50%; */
+    flex: 100%;
+  }
+  .giveaway-status {
+    grid-area: giveaway-status;
+    /* width: 50%; */
+    flex: 100%;
   }
 }
 </style>
