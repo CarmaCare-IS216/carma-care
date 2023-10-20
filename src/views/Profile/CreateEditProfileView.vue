@@ -36,6 +36,7 @@ const profile = ref({
 
 const selectedFile = ref(null)
 const fileUploadRef = ref()
+const formatedFileName = ref(null)
 
 const getInitials = computed(() => {
   const username = profile.value.username // Access the username property from the ref object
@@ -55,25 +56,52 @@ const handleFileChanged = async (event) => {
   const file = event.target.files[0]
   if (!file) return
 
-  // const { data, error } = await supabase.storage
-  //   .from('avatars')
-  //   .upload(`avatar_${user.currentUser.id}.png`, file)
+  const fileName = file.name.split('.')[0]
+  const fileFormat = file.name.split('.')[1] // file format: .jpg/.jpeg/.png
+  formatedFileName.value = `${
+    user.currentUser.id
+  }_${fileName}_${new Date().getTime()}.${fileFormat}`
 
-  // if (error) {
-  //   console.log(error)
-  //   return
-  // }
-  profile.value.avatarUrl = URL.createObjectURL(file)
-  toast.success('Your avatar has been uploaded', {
-    position: POSITION.TOP_CENTER,
-    timeout: 2000
-  })
+  const { data: imageUploadResponse, error: imageUploadError } = await supabase.storage
+    .from('avatars')
+    .upload(formatedFileName.value, file, {
+      contentType: 'auto' // Automatically detect content type
+    })
+
+  if (imageUploadError) {
+    console.error('Image upload error:', imageUploadError)
+    toast.error('Unable to upload avatar image', {
+      position: POSITION.TOP_CENTER,
+      timeout: 5000
+    })
+    return
+  }
+
+  const { data: bucketFile } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(imageUploadResponse.path)
+
+  profile.value.avatarUrl = bucketFile.publicUrl
 }
 
-const handleRemoveFile = () => {
+const handleRemoveFile = async () => {
+  const { data: imageDeleteResponse, error: imageDeleteError } = await supabase.storage
+    .from('avatars')
+    .remove([formatedFileName.value])
+
+  if (imageDeleteError) {
+    console.error('Image delete error:', imageDeleteError)
+    toast.error('Unable to remove avatar image', {
+      position: POSITION.TOP_CENTER,
+      timeout: 5000
+    })
+    return
+  }
+
   profile.value.avatarUrl = null
   fileUploadRef.value.value = ''
   selectedFile.value = null
+  formatedFileName.value = null
 }
 
 const handleCreateProfile = async () => {
@@ -107,7 +135,7 @@ const handleCreateProfile = async () => {
 
   toast.success('Your profile has been created successfully!', {
     position: POSITION.TOP_CENTER,
-    timeout: 2000
+    timeout: 5000
   })
 }
 const handleBackBtn = () => {
