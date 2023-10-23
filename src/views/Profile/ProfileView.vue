@@ -21,9 +21,8 @@ const user = useUserStore()
 const profileInfo = ref({})
 const num_giveaways = ref(0)
 const num_requests = ref(0)
-const carmaHistory = [5, 10, 15, 10, 20]
 
-// fetch user listings from db for giveaway and request count
+// Fetch user listings from db for giveaway and request count
 async function getListings() {
   // get all listings from this user
   const { data, error } = await supabase.from('listings').select('*').eq('poster_id', profileInfo.value.id)
@@ -46,14 +45,17 @@ async function getListings() {
 // Carma chart
 const chartData = ref();
 const chartOptions = ref();
+const chartMonths = ref();
+const carmaData = ref();
 
-let getMonths = () => {
+let getMonthsArr = () => {
   var dateObj = new Date();
   var dateStrings = [];
   var currDateMonth = new Date().getMonth() + 1
   var dateFormatOptions = {}
+  var numOfMonths = profileInfo?.value.carmaHistory ? profileInfo.value.carmaHistory.length + 1 : 1;
 
-  if (carmaHistory.length <= currDateMonth + 1) {
+  if (numOfMonths <= currDateMonth) {
     dateFormatOptions = {
       month: 'short',
     };
@@ -64,7 +66,7 @@ let getMonths = () => {
     };
   }
 
-  for (var i = 0; i < carmaHistory.length; ++i) {
+  for (var i = 0; i < numOfMonths ; ++i) {
     dateStrings.unshift(dateObj.toLocaleString('en-US', dateFormatOptions));
     dateObj.setMonth(dateObj.getMonth() - 1);
   }
@@ -72,13 +74,16 @@ let getMonths = () => {
   return dateStrings;
 }
 
-const setChartData = () => {
-  // Add curr month data to carmaHistory
-  var carmaData = carmaHistory
-  carmaData.push(profileInfo.value.monthlyCarma)
+const setCarmaData = () => {
+  var history = profileInfo?.value.carmaHistory ? profileInfo.value.carmaHistory : []
+  history.push(profileInfo.value.monthlyCarma)
 
+  return history;
+}
+
+const setChartData = () => {
   return {
-    labels: getMonths(),
+    labels: chartMonths,
     datasets: [
       {
         label: 'Carma Points',
@@ -113,13 +118,17 @@ const setChartOptions = () => {
   };
 }
 
+// Init on Load page
 onMounted(() => {
   profileInfo.value = user.profile
   getListings()
+  chartMonths.value = getMonthsArr();
+  carmaData.value = setCarmaData();
   chartData.value = setChartData();
   chartOptions.value = setChartOptions();
 })
 
+// Breakpoint for responsiveness
 const tabletScreen = useMatchMedia(screenSize.tablet)
 
 // For modals
@@ -136,7 +145,7 @@ let toggleModal = () => {
 </script>
 
 <template>
-  <main class="remove-padding">
+  <main class="remove-padding profile-view">
     <section class="profile">
       <div class="profile-content">
         <Avatar v-if="profileInfo.avatarUrl" :image=profileInfo.avatarUrl class="profile-photo" shape="circle" />
@@ -193,9 +202,10 @@ let toggleModal = () => {
     </section>
   </main>
 
-  <div v-if="dietary_restrictions_visible || statistics_visible" class="modal" @click="toggleModal"></div>
+  <div v-if="dietary_restrictions_visible || statistics_visible" class="profile-view profile-view-modal" @click="toggleModal"></div>
   <Dialog :visible="dietary_restrictions_visible" :draggable="false"
-    :header="`${profileInfo.username}'s Dietary Restrictions`" :style="{ width: '50vw' }">
+    :header="`${profileInfo.username}'s Dietary Restrictions`" :style="{ width: '50vw' }" class="
+    profile-view">
     <h3>Special Dietary Requirements</h3>
     <div v-if="profileInfo.dietaryRestrictions">
       <Tag class="category tag" :value="profileInfo.dietaryRestrictions"></Tag>
@@ -212,7 +222,7 @@ let toggleModal = () => {
     </div>
   </Dialog>
   <Dialog :visible="statistics_visible" :draggable="false" :header="`${profileInfo.username}'s Activity`"
-    :style="{ width: '50vw' }">
+    :style="{ width: '50vw' }" class="profile-view">
     <TabsWrapper>
       <Tab icon="pi-hourglass" title="Carma">
         <div class="container pt-small">
@@ -236,8 +246,14 @@ let toggleModal = () => {
   </Dialog>
 </template>
 
-<style scoped>
-.statistics-icon-wrapper {
+<style>
+.profile-view  canvas {
+  display: initial !important;
+  width: 100% !important;
+  height: 50% !important;
+}
+
+.profile-view .statistics-icon-wrapper {
   display: flex;
   width: 150px;
   justify-content: center;
@@ -245,14 +261,14 @@ let toggleModal = () => {
   margin-right: 20px;
 }
 
-.statistics-button {
+.profile-view .statistics-button {
   background: none;
   color: var(--color-primary);
   border-radius: 100px;
   border-color: var(--color-primary);
 }
 
-.modal {
+.profile-view-modal {
   top: 0;
   position: fixed;
   background: rgba(0, 0, 0, 0.5);
@@ -260,19 +276,19 @@ let toggleModal = () => {
   height: 100%;
 }
 
-.tag {
+.profile-view .tag {
   background-color: var(--color-primary);
   margin-right: 5px;
 }
 
-.edit-button {
+.profile-view .edit-button {
   background: var(--color-primary);
   color: white;
   border-radius: 100px;
   border: none;
 }
 
-.profile {
+.profile-view .profile {
   display: flex;
   width: 100%;
   height: 100%;
@@ -283,7 +299,7 @@ let toggleModal = () => {
   align-items: center;
 }
 
-.profile-content {
+.profile-view .profile-content {
   display: grid;
   grid-template-areas:
     'profile-photo profile-info profile-info'
@@ -294,7 +310,7 @@ let toggleModal = () => {
   justify-content: center;
 }
 
-.profile-photo {
+.profile-view .profile-photo {
   grid-area: profile-photo;
   background: darkgray;
   height: 200px;
@@ -307,17 +323,17 @@ let toggleModal = () => {
   color: #fff;
 }
 
-.profile-info {
+.profile-view .profile-info {
   grid-area: profile-info;
   width: fill-available;
 }
 
-.profile-statistics {
+.profile-view .profile-statistics {
   grid-area: statistics;
 }
 
 @media only screen and (max-width: 768px) {
-  .profile-content {
+  .profile-view .profile-content {
     grid-template-areas:
       'profile-photo statistics'
       'profile-info profile-info';
@@ -325,26 +341,26 @@ let toggleModal = () => {
     width: 100%;
   }
 
-  .profile-photo {
+  .profile-view .profile-photo {
     height: 150px;
     width: 150px;
     font-size: 6em;
   }
 
-  .icon {
+  .profile-view .icon {
     display: none
   }
 
-  .statistics-button {
+  .profile-view .statistics-button {
     font-size: 0;
   }
 
-  .statistics-icon-wrapper {
+  .profile-view .statistics-icon-wrapper {
     max-width: 100px;
   }
 }
 
-Button.icon {
+.profile-view Button.icon {
   background: rgba(246, 132, 56, 0.75);
   color: black;
   border-radius: 100%;
@@ -353,7 +369,7 @@ Button.icon {
   margin-right: 15px;
 }
 
-Button.dietary-restrictions {
+.profile-view Button.dietary-restrictions {
   color: var(--color-primary);
   border-color: var(--color-primary);
   background: none;
@@ -364,11 +380,11 @@ Button.dietary-restrictions {
 /*******************
 Overriding PrimeVue's tab component styles 
 ********************/
-.tabview-custom {
+.profile-view .tabview-custom {
   display: grid;
   justify-items: center;
 }
 
-.tabview-custom>a {
+.profile-view .tabview-custom>a {
   width: 170px !important;
 }</style>
