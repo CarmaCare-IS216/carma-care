@@ -53,7 +53,7 @@ let getMonthsArr = () => {
   var dateStrings = [];
   var currDateMonth = new Date().getMonth() + 1
   var dateFormatOptions = {}
-  var numOfMonths = profileInfo?.value.carmaHistory ? profileInfo.value.carmaHistory.length + 1 : 1;
+  var numOfMonths = profileInfo?.value.carmaHistory ? profileInfo.value.carmaHistory.length + 1 : 1; // Add 1 to include curr month
 
   if (numOfMonths <= currDateMonth) {
     dateFormatOptions = {
@@ -75,7 +75,7 @@ let getMonthsArr = () => {
 }
 
 const setCarmaData = () => {
-  var history = profileInfo?.value.carmaHistory ? profileInfo.value.carmaHistory : []
+  var history = profileInfo?.value.carmaHistory ? [... profileInfo.value.carmaHistory] : []
   history.push(profileInfo.value.monthlyCarma)
 
   return history;
