@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import router from '../../router'
 import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
 
@@ -33,6 +34,7 @@ import { useToast, POSITION } from 'vue-toastification'
 
 import { useUserStore } from '../../stores/user'
 
+const route = useRoute()
 const toast = useToast()
 const user = useUserStore()
 
@@ -41,7 +43,7 @@ const imageFiles = ref([])
 const showPreview = ref(false)
 const form = ref({
   posterID: user.currentUser.id,
-  username: user.profile.username,
+  username: user.profile?.username,
   listingType: LISTING_TYPE.Giveaway, // (LISTING_TYPE.Request for CreateEditRequestView.vue)
   listingTitle: '',
   status: '',
@@ -56,12 +58,55 @@ const form = ref({
   locationDescription: ''
 })
 
-const giveawayTypeOptions = convertConstantsToDropdownOptions(LISTING_TYPE)
+onMounted(async () => {
+  user.profile = await user.fetchUserProfile()
+
+  if (route.name === 'Edit Giveaway') {
+    getGiveawayData()
+  }
+})
+
 const statusOptions = convertConstantsToDropdownOptions(STATUS)
 const allergensOptions = convertConstantsToDropdownOptions(FOOD_ALLERGENS)
 const dietaryRestrictionsOptions = convertConstantsToDropdownOptions(DIETARY_RESTRICTIONS)
 const servingsizeOptions = convertConstantsToDropdownOptions(SERVING_SIZE)
 const categoryOptions = convertConstantsToDropdownOptions(CATEGORY)
+
+const getGiveawayData = async () => {
+  const { data, error } = await supabase
+    .from('listings')
+    .select(
+      'poster_id,listingID,listingType, postingTime, locationAddress, category, dietaryRestrictions, allergens, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
+    )
+    .match({ listingID: route.params.id, poster_id: user.currentUser.id })
+    .single()
+
+  // : avatarUrl = item.avatarUrl
+
+  if (error) {
+    console.log('error: ', error)
+    // handle the error
+  } else {
+    // do something with the data (e.g. assign data to an array ref)
+    // queryData.value = data
+    form.value = {
+      posterID: data.poster_id,
+      username: data.userProfiles.username,
+      listingType: data.listingType, // (LISTING_TYPE.Request for CreateEditRequestView.vue)
+      listingTitle: data.listingTitle,
+      status: data.status,
+      category: data.category,
+      dietaryRestrictions: data.dietaryRestrictions || null,
+      foodAllergens: data.allergens || [],
+      tags: data.tags || [],
+      description: data.description || '',
+      images: data.images || [],
+      quantityNum: data.quantityNum || '',
+      locationAddress: data.locationAddress || '',
+      locationDescription: data.locationDesc || ''
+    }
+  }
+}
 
 const handleBackBtn = () => {
   router.go(-1)
@@ -135,6 +180,48 @@ const handleCreateGiveaway = async () => {
   isLoading.value = false
 }
 
+const handleEditGiveaway = async () => {
+  isLoading.value = true
+
+  const { data, error } = await supabase.from('listings').upsert(
+    [
+      {
+        listingID: route.params.id,
+        poster_id: user.currentUser.id,
+        listingType: form.value.listingType,
+        listingTitle: form.value.listingTitle,
+        status: form.value.status,
+        category: form.value.category,
+        dietaryRestrictions: form.value.dietaryRestrictions,
+        allergens: form.value.foodAllergens,
+        tags: form.value.tags,
+        listingDesc: form.value.description,
+        images: form.value.images,
+        quantityNum: form.value.quantityNum,
+        locationAddress: form.value.locationAddress,
+        locationDesc: form.value.locationDescription
+      }
+    ]
+    // { onConflict: ['poster_id', 'listingID'] } // Specify how to handle conflicts
+  )
+
+  if (error) {
+    console.log('editGiveaway error: ', error)
+    toast.error('Edited Giveaway unsuccessful', {
+      position: POSITION.TOP_CENTER
+    })
+    isLoading.value = false
+  } else {
+    router.push({ name: 'Giveaways' })
+    toast.success('Edited Giveaway successfully', {
+      position: POSITION.TOP_CENTER,
+      timeout: 5000
+    })
+  }
+
+  isLoading.value = false
+}
+
 const handleUploadImages = (images) => {
   imageFiles.value = images.value
 }
@@ -150,8 +237,8 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
         <p class="preview-title">Preview Card</p>
         <ListingsCard
           :listingType="form.listingType"
-          :username="user.profile.username"
-          :avatarUrl="user.profile.avatarUrl"
+          :username="user.profile?.username"
+          :avatarUrl="user.profile?.avatarUrl"
           :postingTime="null"
           :locationAddress="form.locationAddress"
           :category="form.category"
@@ -314,6 +401,15 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                 <Button icon="pi pi-times" label="Cancel" rounded outlined @click="handleBackBtn" />
               </router-link>
               <Button
+                v-if="route.name === 'Edit Giveaway'"
+                icon="pi pi-plus"
+                label="Save Changes"
+                rounded
+                :disabled="isLoading"
+                @click="handleEditGiveaway"
+              />
+              <Button
+                v-else
                 icon="pi pi-plus"
                 label="Create"
                 rounded
@@ -330,8 +426,8 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
   <Dialog v-model:visible="showPreview" modal header="Listing Preview" class="preview-dialog">
     <ListingsCard
       :listingType="form.listingType"
-      :username="user.profile.username"
-      :avatarUrl="user.profile.avatarUrl"
+      :username="user.profile?.username"
+      :avatarUrl="user.profile?.avatarUrl"
       :postingTime="null"
       :locationAddress="form.locationAddress"
       :category="form.category"

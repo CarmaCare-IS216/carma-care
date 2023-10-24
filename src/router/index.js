@@ -41,6 +41,16 @@ const router = createRouter({
         requiresProfile: true
       }
     },
+    {
+      path: '/giveaways/edit/:id',
+      name: 'Edit Giveaway',
+      component: CreateEditGiveawayView,
+      meta: {
+        layout: DefaultLayout,
+        requiresAuth: true
+        // requiresProfile: true
+      }
+    },
 
     {
       path: '/requests',
@@ -136,6 +146,7 @@ async function getUser(next, key, redirectPath) {
 
 async function getUserProfile(next) {
   const user = useUserStore()
+  console.log('userProfile: ', user.currentUser.id)
   if (user.currentUser === null) {
     next('/login')
   }

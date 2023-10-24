@@ -7,7 +7,7 @@ import { ref, onMounted } from 'vue'
 
 const queryData = ref([])
 const user = useUserStore()
-const currentUser=user.currentUser.id
+const currentUser = user.currentUser?.id
 // grab user id
 
 onMounted(() => {
@@ -29,106 +29,88 @@ async function getData(queryData) {
     // handle the error
   } else {
     // do something with the data (e.g. assign data to an array ref)
-    queryData.value=data
-
+    queryData.value = data
   }
 }
 
-
 async function getFiltered(condition) {
-  var categoryFilter=condition.categoryFilter
-  var restrictionsFilter=condition.restrictionsFilter
-  var allergensFilter=condition.allergensFilter
+  var categoryFilter = condition.categoryFilter
+  var restrictionsFilter = condition.restrictionsFilter
+  var allergensFilter = condition.allergensFilter
 
-  var query=supabase
+  var query = supabase
     .from('listings')
     .select(
       'poster_id,listingID,listingType,allergens, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
     )
-    
-  query.in("category",categoryFilter)
 
-  if(restrictionsFilter!="Null"){
-    query.eq("dietaryRestrictions",restrictionsFilter)
+  query.in('category', categoryFilter)
+
+  if (restrictionsFilter != 'Null') {
+    query.eq('dietaryRestrictions', restrictionsFilter)
   }
 
-
-
-
   const { data, error } = await query
-  
+
   if (error) {
     console.log('error: ', error)
     // handle the error
   } else {
     // do something with the data (e.g. assign data to an array ref)
-    var output=[]
-    var noAllergens=true
-    if (allergensFilter!=""){
-        for(var record in data){
+    var output = []
+    var noAllergens = true
+    if (allergensFilter != '') {
+      for (var record in data) {
+        if (data[record].allergens != null) {
+          for (var allergen of allergensFilter) {
+            allergen = allergen.slice(3)
 
-          if(data[record].allergens!=null){
-            for(var allergen of allergensFilter){
-              allergen=allergen.slice(3)
-
-              if(data[record].allergens.includes(allergen)){
-                noAllergens=false
-                break
-              }
+            if (data[record].allergens.includes(allergen)) {
+              noAllergens = false
+              break
             }
           }
-
-
-          if(noAllergens){
-            output.push(data[record])
-          }
-          noAllergens=true
         }
-      return output
 
-    }
-    else{
+        if (noAllergens) {
+          output.push(data[record])
+        }
+        noAllergens = true
+      }
+      return output
+    } else {
       return data
     }
-
   }
 }
 
 async function search(searchData) {
-  if(searchData==undefined){
-    searchData=""
+  if (searchData == undefined) {
+    searchData = ''
   }
   if (this.timer) {
-      clearTimeout(this.timer);
-      this.timer = null;
+    clearTimeout(this.timer)
+    this.timer = null
   }
   this.timer = setTimeout(async () => {
-      // your code
-      // const columnsToSelect='listingType', 'username', 'postingTime', 'locationAddress', 'category', 'image', 'listingTitle', 'tags', 'quantityNum', 'quantityUnit'
-      const { data, error } = await supabase
-        .from('listings')
-        .select(
-          'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
-        ).ilike("listingTitle","%"+searchData+"%")
+    // your code
+    // const columnsToSelect='listingType', 'username', 'postingTime', 'locationAddress', 'category', 'image', 'listingTitle', 'tags', 'quantityNum', 'quantityUnit'
+    const { data, error } = await supabase
+      .from('listings')
+      .select(
+        'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
+      )
+      .ilike('listingTitle', '%' + searchData + '%')
 
-
-      if (error) {
-        console.log('error: ', error)
-        // handle the error
-      } else {
-        // do something with the data (e.g. assign data to an array ref)
-        queryData.value=data
-      }
-
-
-  }, 300);
-
+    if (error) {
+      console.log('error: ', error)
+      // handle the error
+    } else {
+      // do something with the data (e.g. assign data to an array ref)
+      queryData.value = data
+    }
+  }, 300)
 }
-
-
-
-
-
 </script>
 
 <!-- play with time data -->
@@ -136,8 +118,8 @@ async function search(searchData) {
 <template>
   <main class="giveaways">
     <ListingsHeader
-      @passQuery="async (query) =>queryData=await getFiltered(query) "
-      @passSearch='async (query) =>queryData=await search(query)'
+      @passQuery="async (query) => (queryData = await getFiltered(query))"
+      @passSearch="async (query) => (queryData = await search(query))"
       searchBarPlaceholder="Search Giveaways"
       createButtonRouteName="Create Giveaway"
     />
@@ -145,6 +127,7 @@ async function search(searchData) {
       <ListingsCard
         v-for="item in queryData"
         :key="item.listingID"
+        :listingID="item.listingID"
         :listingType="item.listingType"
         :username="item.userProfiles.username"
         :avatarUrl="item.userProfiles.avatarUrl"
@@ -156,11 +139,10 @@ async function search(searchData) {
         :tags="item.tags"
         :status="item.status"
         :quantityNum="item.quantityNum"
-        :isPoster="item.poster_id==currentUser"
+        :isPoster="item.poster_id == currentUser"
       />
     </div>
   </main>
 </template>
 
 <style scoped></style>
-
