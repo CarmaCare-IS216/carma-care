@@ -471,7 +471,7 @@ main {
 }
 
 .form-container {
-  margin-top: -300px;
+  margin-top: -350px;
 }
 
 .form-container form {
