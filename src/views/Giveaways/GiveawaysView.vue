@@ -7,7 +7,7 @@ import { ref, onMounted } from 'vue'
 
 const queryData = ref([])
 const user = useUserStore()
-const currentUser = user.currentUser.id
+const currentUser = user.currentUser?.id
 // grab user id
 
 onMounted(() => {
@@ -130,6 +130,7 @@ async function search(searchData) {
       <ListingsCard
         v-for="item in queryData"
         :key="item.listingID"
+        :listingID="item.listingID"
         :listingType="item.listingType"
         :username="item.userProfiles.username"
         :avatarUrl="item.userProfiles.avatarUrl"
