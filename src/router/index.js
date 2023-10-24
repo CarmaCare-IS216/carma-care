@@ -47,8 +47,8 @@ const router = createRouter({
       component: CreateEditGiveawayView,
       meta: {
         layout: DefaultLayout,
-        requiresAuth: true
-        // requiresProfile: true
+        requiresAuth: true,
+        requiresProfile: true
       }
     },
 
