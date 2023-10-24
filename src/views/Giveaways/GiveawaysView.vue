@@ -21,6 +21,7 @@ async function getData(queryData) {
     .select(
       'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
     )
+    .order('postingTime', { ascending: true })
 
   // : avatarUrl = item.avatarUrl
 
@@ -43,6 +44,7 @@ async function getFiltered(condition) {
     .select(
       'poster_id,listingID,listingType,allergens, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
     )
+    .order('postingTime', { ascending: true })
 
   query.in('category', categoryFilter)
 
@@ -101,6 +103,7 @@ async function search(searchData) {
         'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
       )
       .ilike('listingTitle', '%' + searchData + '%')
+      .order('postingTime', { ascending: true })
 
     if (error) {
       console.log('error: ', error)
