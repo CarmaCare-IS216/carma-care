@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 // Views
 import GiveawaysView from '@/views/Giveaways/GiveawaysView.vue'
 import CreateEditGiveawayView from '@/views/Giveaways/CreateEditGiveawayView.vue'
+import GiveawayDetailView from '@/views/Giveaways/GiveawayDetailView.vue'
 
 import RequestsView from '@/views/Requests/RequestsView.vue'
 import CreateEditRequestView from '@/views/Requests/CreateEditRequestView.vue'
@@ -29,6 +30,16 @@ const router = createRouter({
       component: GiveawaysView,
       meta: {
         layout: DefaultLayout
+      }
+    },
+    {
+      path: '/giveaways/:id',
+      name: 'Giveaway Detail',
+      component: GiveawayDetailView,
+      meta: {
+        layout: DefaultLayout
+        // requiresAuth: true
+        // requiresProfile: true
       }
     },
     {
