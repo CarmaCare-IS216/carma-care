@@ -17,6 +17,7 @@ body {
   font-family: 'Poppins', sans-serif;
   min-height: 100vh;
   margin: 0;
+  background-color: #ff660008;
 }
 
 h1,
@@ -72,6 +73,7 @@ input {
   main {
     padding-top: 75px;
     /* padding-bottom: 80px; */
+    padding-bottom: 60px !important;
   }
 
   .container {

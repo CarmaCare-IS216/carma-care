@@ -12,6 +12,9 @@ import Toast from 'vue-toastification'
 // Import the CSS or use your own!
 import 'vue-toastification/dist/index.css'
 
+import '@egjs/vue3-flicking/dist/flicking.css'
+import '@egjs/flicking-plugins/dist/arrow.css'
+
 const app = createApp(App)
 
 app.use(createPinia())
