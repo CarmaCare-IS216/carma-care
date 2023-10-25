@@ -47,6 +47,7 @@ const form = ref({
   posterID: user.currentUser.id,
   username: user.profile?.username,
   avatarUrl: user.profile?.avatarUrl,
+  userAllergies: user.profile?.allergies,
   listingType: LISTING_TYPE.Giveaway, // (LISTING_TYPE.Request for CreateEditRequestView.vue)
   listingTitle: '',
   status: '',
@@ -61,6 +62,10 @@ const form = ref({
   locationDescription: ''
 })
 
+const renderTextContent = (value) => {
+  return value === '' || value === null ? '-' : value
+}
+
 onMounted(() => {
   getGiveawayDetailData()
   imageCarouselSetup()
@@ -70,7 +75,7 @@ const getGiveawayDetailData = async () => {
   const { data, error } = await supabase
     .from('listings')
     .select(
-      'poster_id,listingID,listingType, listingDesc, postingTime, locationAddress, locationDesc, category, dietaryRestrictions, allergens, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
+      'poster_id,listingID,listingType, listingDesc, postingTime, locationAddress, locationDesc, category, dietaryRestrictions, allergens, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl, allergies)'
     )
     .match({ listingID: route.params.id, poster_id: user.currentUser.id })
     .single()
@@ -87,6 +92,7 @@ const getGiveawayDetailData = async () => {
       posterID: data.poster_id,
       username: data.userProfiles.username,
       avatarUrl: data.userProfiles.avatarUrl,
+      userAllergies: data.userProfiles.allergies,
       listingType: data.listingType, // (LISTING_TYPE.Request for CreateEditRequestView.vue)
       listingTitle: data.listingTitle,
       status: data.status,
@@ -206,7 +212,9 @@ const computedBgOverlay = computed(() => {
           </div>
           <div class="giveaway-item giveaway-diet">
             <span class="giveaway-item-label">Dietary Restriction</span>
-            <span class="giveaway-item-value">{{ form.dietaryRestrictions }}</span>
+            <span class="giveaway-item-value">{{
+              renderTextContent(form.dietaryRestrictions)
+            }}</span>
           </div>
           <div class="giveaway-item giveaway-serving">
             <span class="giveaway-item-label">Serving Size</span>
@@ -215,22 +223,30 @@ const computedBgOverlay = computed(() => {
           <div class="giveaway-item giveaway-tags">
             <span class="giveaway-item-label">Main Ingredients</span>
             <span class="giveaway-item-value">
-              <Tag severity="warning" value="Mango" rounded />
-              <Tag severity="warning" value="Milk" rounded />
-              <Tag severity="warning" value="Cream" rounded />
+              <Tag
+                v-for="(tag, index) in form.tags"
+                :key="index"
+                severity="warning"
+                :value="tag"
+                rounded
+              />
             </span>
           </div>
           <div class="giveaway-item giveaway-allergens">
             <span class="giveaway-item-label">Food Allergens</span>
             <span class="giveaway-item-value">
-              <Tag severity="danger" value="Mango" rounded />
-              <Tag severity="danger" value="Milk" rounded />
-              <Tag severity="danger" value="Cream" rounded />
+              <Tag
+                v-for="(allergen, index) in form.foodAllergens"
+                :key="index"
+                severity="danger"
+                :value="allergen"
+                rounded
+              />
             </span>
           </div>
           <div class="giveaway-item giveaway-description">
             <span class="giveaway-item-label">Description</span>
-            <span class="giveaway-item-value">{{ form.description }}</span>
+            <span class="giveaway-item-value">{{ renderTextContent(form.description) }}</span>
           </div>
         </div>
 
@@ -239,11 +255,13 @@ const computedBgOverlay = computed(() => {
         <div class="location-information">
           <div class="giveaway-item">
             <span class="giveaway-item-label">Location Name</span>
-            <span class="giveaway-item-value">{{ form.locationAddress }}</span>
+            <span class="giveaway-item-value">{{ renderTextContent(form.locationAddress) }}</span>
           </div>
           <div class="giveaway-item">
             <span class="giveaway-item-label">Location Description</span>
-            <span class="giveaway-item-value">{{ form.locationDescription }}</span>
+            <span class="giveaway-item-value">{{
+              renderTextContent(form.locationDescription)
+            }}</span>
           </div>
           <div class="giveaway-item giveaway-estimated-time">
             <span class="giveaway-item-label">Estimated Arrival Time</span>
@@ -279,9 +297,13 @@ const computedBgOverlay = computed(() => {
             <div class="food-allergens-container">
               <p>Food Allergens</p>
               <div class="tags">
-                <Tag severity="danger" value="Mango" rounded />
-                <Tag severity="danger" value="Milk" rounded />
-                <Tag severity="danger" value="Cream" rounded />
+                <Tag
+                  v-for="(allergy, index) in form.userAllergies"
+                  :key="index"
+                  severity="danger"
+                  :value="allergy"
+                  rounded
+                />
               </div>
             </div>
 
