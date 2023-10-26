@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, useRoute } from 'vue-router'
 
 // Views
 import GiveawaysView from '@/views/Giveaways/GiveawaysView.vue'
@@ -103,6 +103,17 @@ const router = createRouter({
         alreadyHaveProfile: true
       }
     },
+    {
+      path: '/profile/:handle/edit',
+      name: 'Edit Profile',
+      component: CreateEditProfileView,
+      meta: {
+        layout: DefaultLayout,
+        requiresAuth: true,
+        requiresProfile: true,
+        alreadyHaveProfile: true
+      }
+    },
 
     {
       path: '/chatroom',
@@ -155,28 +166,30 @@ async function getUser(next, key, redirectPath) {
   }
 }
 
-async function getUserProfile(next) {
+async function getUserProfile(next, toFullPath) {
   const user = useUserStore()
-  console.log('userProfile: ', user.currentUser.id)
   if (user.currentUser === null) {
     next('/login')
   }
-  user.fetchUserProfile(user.currentUser.id).then((data) => {
-    if (user.currentUser && data === null) {
-      next()
-    } else {
-      next('/')
-    }
-  })
+
+  user.profile = await user.fetchUserProfile()
+
+  if (user.currentUser && user.profile && toFullPath !== '/profile/create') {
+    next()
+  } else {
+    next('/')
+  }
 }
 
 // auth requirements
 router.beforeEach((to, from, next) => {
   const currentUrl = from.fullPath
 
+  console.log('beforEach: ', to)
+
   console.log(currentUrl)
   if (to.meta.alreadyHaveProfile) {
-    getUserProfile(next)
+    getUserProfile(next, to.fullPath)
   } else if (to.meta.requiresProfile) {
     getUser(next, 'profile', '/profile/create')
   } else if (to.meta.requiresAuth) {

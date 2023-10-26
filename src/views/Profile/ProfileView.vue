@@ -2,10 +2,10 @@
 import Tab from '../../components/Tab/Tab.vue'
 import TabsWrapper from '../../components/Tab/TabsWrapper.vue'
 import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
-import Button from 'primevue/Button';
-import Avatar from 'primevue/Avatar';
-import Dialog from 'primevue/dialog';
-import Tag from 'primevue/tag';
+import Button from 'primevue/Button'
+import Avatar from 'primevue/Avatar'
+import Dialog from 'primevue/dialog'
+import Tag from 'primevue/tag'
 import { ref, onMounted } from 'vue'
 import { LISTING_TYPE } from '../../util/constants'
 
@@ -24,17 +24,20 @@ const num_requests = ref({})
 // fetch user listings from db for giveaway and request count
 async function getListings() {
   // get all listings from this user
-  const { data, error } = await supabase.from('listings').select('*').eq('poster_id', profileInfo.value.id)
+  const { data, error } = await supabase
+    .from('listings')
+    .select('*')
+    .eq('poster_id', profileInfo.value.id)
 
   if (error) {
     console.log('error: ', error)
   } else {
     console.log(data)
     // filter out the giveaways and requests
-    var giveaways = data.filter(listing => {
+    var giveaways = data.filter((listing) => {
       return listing.listingType === LISTING_TYPE.Giveaway
     })
-    var requests = data.filter(listing => {
+    var requests = data.filter((listing) => {
       return listing.listingType === LISTING_TYPE.Request
     })
     num_giveaways.value = giveaways.length
@@ -50,40 +53,58 @@ onMounted(() => {
 const tabletScreen = useMatchMedia(screenSize.tablet)
 
 // For modal
-var visible = ref(false);
-let toggleModal = () => visible.value = !visible.value;
-
+var visible = ref(false)
+let toggleModal = () => (visible.value = !visible.value)
 </script>
 
 <template>
   <main class="remove-padding">
     <section class="profile">
       <div class="profile-content">
-        <Avatar v-if="profileInfo.avatarUrl" :image=profileInfo.avatarUrl class="profile-photo" shape="circle" />
-        <Avatar v-else :label="`${profileInfo?.username ? profileInfo.username.charAt(0).toUpperCase() : ''}`" class="profile-photo" shape="circle"/>
+        <Avatar
+          v-if="profileInfo.avatarUrl"
+          :image="profileInfo.avatarUrl"
+          class="profile-photo"
+          shape="circle"
+        />
+        <Avatar
+          v-else
+          :label="`${profileInfo?.username ? profileInfo.username.charAt(0).toUpperCase() : ''}`"
+          class="profile-photo"
+          shape="circle"
+        />
         <div class="profile-info">
-          <div style="display: flex; justify-content: space-between; padding-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; padding-bottom: 20px">
             <div>
               <h1>{{ profileInfo.username }}</h1>
               <p style="color: var(--color-primary)">@{{ profileInfo.handle }}</p>
             </div>
-            <Button type="button" class="edit-button" label="Edit Profile" icon="pi pi-cog"/>
+            <router-link :to="{ name: 'Edit Profile' }">
+              <Button type="button" class="edit-button" label="Edit Profile" icon="pi pi-cog" />
+            </router-link>
           </div>
-          <p style="padding-bottom: 20px;">{{ profileInfo.description }}</p>
+          <p style="padding-bottom: 20px">{{ profileInfo.description }}</p>
           <Button class="dietary-restrictions" @click="visible = true">Dietary Preferences</Button>
         </div>
         <div class="profile-statistics">
-          <div style="width: fill-available; display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex;">
+          <div
+            style="
+              width: fill-available;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            "
+          >
+            <div style="display: flex">
               <div class="statistics-icon-wrapper">
-                <div><Button class="icon" icon="pi pi-star"/></div>
+                <div><Button class="icon" icon="pi pi-star" /></div>
                 <div>
                   <h3>{{ num_giveaways }}</h3>
                   <p>Giveaways Made</p>
                 </div>
               </div>
               <div class="statistics-icon-wrapper">
-                <div><Button class="icon" icon="pi pi-download"/></div>
+                <div><Button class="icon" icon="pi pi-download" /></div>
                 <div>
                   <h3>{{ num_requests }}</h3>
                   <p>Requests Made</p>
@@ -91,8 +112,19 @@ let toggleModal = () => visible.value = !visible.value;
               </div>
             </div>
             <div>
-              <Button v-if="tabletScreen" type="button" class="statistics-button" icon="pi pi-chart-bar"/>
-              <Button v-else type="button" class="statistics-button" label="View Statistics" icon="pi pi-chart-bar"/>
+              <Button
+                v-if="tabletScreen"
+                type="button"
+                class="statistics-button"
+                icon="pi pi-chart-bar"
+              />
+              <Button
+                v-else
+                type="button"
+                class="statistics-button"
+                label="View Statistics"
+                icon="pi pi-chart-bar"
+              />
             </div>
           </div>
         </div>
@@ -111,25 +143,31 @@ let toggleModal = () => visible.value = !visible.value;
   </main>
 
   <div v-if="visible" class="modal" @click="toggleModal"></div>
-  <Dialog :visible="visible" :header="`${profileInfo.username}'s Dietary Preferences`" :style="{ width: '50vw' }">
-        <h3>Dietary Restrictions</h3>
-        <div v-if="profileInfo.dietaryRestrictions">
-          <Tag class="category tag" :value="profileInfo.dietaryRestrictions"></Tag>
-        </div>
-        <div v-else>
-          <p>None</p>
-        </div>
-        <h3 style="margin-top: 10px">Allergies</h3>
-        <div v-if="profileInfo.allergies.length != 0">
-          <Tag v-for="(item, index) in profileInfo.allergies" :key="index"
-              class="category tag"
-              :value="item"
-          ></Tag>
-        </div>
-        <div v-else>
-          <p>None</p>
-        </div>
-    </Dialog>
+  <Dialog
+    :visible="visible"
+    :header="`${profileInfo.username}'s Dietary Preferences`"
+    :style="{ width: '50vw' }"
+  >
+    <h3>Dietary Restrictions</h3>
+    <div v-if="profileInfo.dietaryRestrictions">
+      <Tag class="category tag" :value="profileInfo.dietaryRestrictions"></Tag>
+    </div>
+    <div v-else>
+      <p>None</p>
+    </div>
+    <h3 style="margin-top: 10px">Allergies</h3>
+    <div v-if="profileInfo.allergies.length != 0">
+      <Tag
+        v-for="(item, index) in profileInfo.allergies"
+        :key="index"
+        class="category tag"
+        :value="item"
+      ></Tag>
+    </div>
+    <div v-else>
+      <p>None</p>
+    </div>
+  </Dialog>
 </template>
 
 <style scoped>
@@ -149,7 +187,7 @@ let toggleModal = () => visible.value = !visible.value;
 .modal {
   top: 0;
   position: fixed;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   width: 100%;
   height: 100%;
 }
@@ -218,7 +256,7 @@ let toggleModal = () => visible.value = !visible.value;
     font-size: 6em;
   }
   .icon {
-    display: none
+    display: none;
   }
   .statistics-button {
     font-size: 0;
@@ -228,15 +266,15 @@ let toggleModal = () => visible.value = !visible.value;
   }
 }
 Button.icon {
-  background: rgba(246,132,56,0.75);
-  color:black;
+  background: rgba(246, 132, 56, 0.75);
+  color: black;
   border-radius: 100%;
   outline: none;
   border: none;
   margin-right: 15px;
 }
 Button.dietary-restrictions {
-  color:var(--color-primary);
+  color: var(--color-primary);
   border-color: var(--color-primary);
   background: none;
   border-radius: 50px;
