@@ -4,10 +4,11 @@ import ListingsCard from '../../components/Listings/ListingsCard.vue'
 import { useUserStore } from '../../stores/user'
 import { supabase } from '@/lib/supabase'
 import { ref, onMounted } from 'vue'
-
+import ProgressSpinner from 'primevue/progressspinner';
 const queryData = ref([])
 const user = useUserStore()
-const currentUser = user.currentUser?.id
+const currentUser=user.currentUser?.id
+const isSearching=ref()
 // grab user id
 
 onMounted(() => {
@@ -15,12 +16,13 @@ onMounted(() => {
 })
 
 async function getData(queryData) {
+  isSearching.value=true
   // const columnsToSelect='listingType', 'username', 'postingTime', 'locationAddress', 'category', 'image', 'listingTitle', 'tags', 'quantityNum', 'quantityUnit'
   const { data, error } = await supabase
     .from('listings')
     .select(
       'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
-    )
+    ).eq("listingType","Giveaway")
     .order('postingTime', { ascending: true })
 
   // : avatarUrl = item.avatarUrl
@@ -30,11 +32,16 @@ async function getData(queryData) {
     // handle the error
   } else {
     // do something with the data (e.g. assign data to an array ref)
-    queryData.value = data
+    queryData.value=data
+    isSearching.value=false
+
+
   }
 }
 
 async function getFiltered(condition) {
+  isSearching.value = true
+
   var categoryFilter = condition.categoryFilter
   var restrictionsFilter = condition.restrictionsFilter
   var allergensFilter = condition.allergensFilter
@@ -43,7 +50,7 @@ async function getFiltered(condition) {
     .from('listings')
     .select(
       'poster_id,listingID,listingType,allergens, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
-    )
+    ).eq("listingType","Giveaway")
     .order('postingTime', { ascending: true })
 
   query.in('category', categoryFilter)
@@ -79,14 +86,22 @@ async function getFiltered(condition) {
         }
         noAllergens = true
       }
+      isSearching.value=false
+
       return output
-    } else {
+
+    }
+    else{
+      isSearching.value=false
+
       return data
     }
+
   }
 }
 
 async function search(searchData) {
+  isSearching.value=true
   if (searchData == undefined) {
     searchData = ''
   }
@@ -95,15 +110,16 @@ async function search(searchData) {
     this.timer = null
   }
   this.timer = setTimeout(async () => {
-    // your code
-    // const columnsToSelect='listingType', 'username', 'postingTime', 'locationAddress', 'category', 'image', 'listingTitle', 'tags', 'quantityNum', 'quantityUnit'
-    const { data, error } = await supabase
-      .from('listings')
-      .select(
-        'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
-      )
-      .ilike('listingTitle', '%' + searchData + '%')
-      .order('postingTime', { ascending: true })
+      // your code
+      // const columnsToSelect='listingType', 'username', 'postingTime', 'locationAddress', 'category', 'image', 'listingTitle', 'tags', 'quantityNum', 'quantityUnit'
+      isSearching.value=true
+
+      const { data, error } = await supabase
+        .from('listings')
+        .select(
+          'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
+        ).ilike("listingTitle","%"+searchData+"%").eq("listingType","Giveaway")
+
 
     if (error) {
       console.log('error: ', error)
@@ -111,6 +127,8 @@ async function search(searchData) {
     } else {
       // do something with the data (e.g. assign data to an array ref)
       queryData.value = data
+        isSearching.value=false
+
     }
   }, 300)
 }
@@ -126,7 +144,14 @@ async function search(searchData) {
       searchBarPlaceholder="Search Giveaways"
       createButtonRouteName="Create Giveaway"
     />
-    <div class="container listings-cards">
+    <div>
+    <ProgressSpinner class="listings-cards" v-if="isSearching"/>
+    <div  v-else>
+
+        <h2 class="container listings-cards" style="margin-bottom: 30px;">Showing {{ queryData.length }} result:</h2>
+      
+    </div>
+    <div  class="container listings-cards">
       <ListingsCard
         v-for="item in queryData"
         :key="item.listingID"
@@ -145,7 +170,18 @@ async function search(searchData) {
         :isPoster="item.poster_id == currentUser"
       />
     </div>
+
+
+
+    </div>
+    
   </main>
 </template>
 
-<style scoped></style>
+<style scoped>
+.listings-cards{
+  margin-bottom: 70px;
+}
+
+</style>
+
