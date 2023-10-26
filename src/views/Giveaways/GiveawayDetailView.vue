@@ -32,17 +32,7 @@ const bgOverlay = ref('')
 const flickingPlugins = ref([])
 const flickingMainImage = ref()
 const flickingImageCarousel = ref()
-const images = ref([
-  {
-    url: 'https://drivemehungry.com/wp-content/uploads/2020/11/IMG_8970.jpg'
-  },
-  {
-    url: 'https://japan.recipetineats.com/wp-content/uploads/2020/08/Strawberry_Shortcake_5140sq.jpg'
-  },
-  {
-    url: 'https://thebigmansworld.com/wp-content/uploads/2021/03/keto-strawberry-shortcake.jpg'
-  }
-])
+
 const form = ref({
   posterID: user.currentUser.id,
   username: user.profile?.username,
@@ -132,11 +122,6 @@ const imageCarouselSetup = () => {
     })
   ]
 }
-
-const computedBgOverlay = computed(() => {
-  // Use the bgOverlay.value here to construct the background image URL
-  return `linear-gradient(#ffc892, #ffffff7d), var(--bg-image)`
-})
 </script>
 
 <template>
@@ -348,6 +333,7 @@ section.giveaway-detail-top {
 
 .giveaway-detail-top-content {
   max-width: 520px;
+  width: 100%;
   display: flex;
   /* margin-top: 20px; */
   /* justify-content: center; */
@@ -371,7 +357,7 @@ section.giveaway-detail-top {
 
 .giveaway-main-image img {
   width: 100%;
-  height: auto;
+  height: 100%;
   border-radius: 25px;
 }
 .giveaway-main-image .flicking-arrow-prev,
@@ -401,7 +387,7 @@ section.giveaway-detail-top .giveaway-cta-btn {
 }
 .giveaway-image-carousel img {
   width: 100%;
-  height: auto;
+  height: 100%;
   max-width: 150px;
   max-height: 150px;
   object-fit: cover;
