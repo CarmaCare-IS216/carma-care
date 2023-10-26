@@ -154,14 +154,14 @@ async function search(searchData) {
     <ListingsHeader
       @passQuery="async (query) =>queryData=await getFiltered(query) "
       @passSearch='async (query) =>queryData=await search(query)'
-      searchBarPlaceholder="Search Giveaways"
-      createButtonRouteName="Create Giveaway"
+      searchBarPlaceholder="Search Request"
+      createButtonRouteName="Create Request"
     />
     <div>
     <ProgressSpinner class="listings-cards" v-if="isSearching"/>
     <div  v-else>
 
-        <h2 class="listings-cards" style="margin-bottom: 30px;">Showing {{ queryData.length }} result:</h2>
+        <h2 class="container listings-cards" style="margin-bottom: 30px;">Showing {{ queryData.length }} result:</h2>
       
     </div>
     <div  class="container listings-cards">

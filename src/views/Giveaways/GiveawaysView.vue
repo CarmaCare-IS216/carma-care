@@ -148,7 +148,7 @@ async function search(searchData) {
     <ProgressSpinner class="listings-cards" v-if="isSearching"/>
     <div  v-else>
 
-        <h2 class="listings-cards" style="margin-bottom: 30px;">Showing {{ queryData.length }} result:</h2>
+        <h2 class="container listings-cards" style="margin-bottom: 30px;">Showing {{ queryData.length }} result:</h2>
       
     </div>
     <div  class="container listings-cards">
