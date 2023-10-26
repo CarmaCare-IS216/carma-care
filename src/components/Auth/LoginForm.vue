@@ -42,19 +42,16 @@ const handleLogin = async () => {
     email.value = ''
     password.value = ''
   } else {
-    await user.fetchUserProfile(data.user.id).then((data) => {
-      user.profile = data
+    user.profile = await user.fetchUserProfile()
+    if (user.profile === null) {
+      router.push({ name: 'Create Profile' })
+    } else {
+      router.push({ name: 'Giveaways' })
+    }
 
-      if (data === null) {
-        router.push({ name: 'Create Profile' })
-      } else {
-        router.push({ name: 'Giveaways' })
-      }
-
-      toast.success('Logged in successfully', {
-        position: POSITION.TOP_CENTER,
-        timeout: 2000
-      })
+    toast.success('Logged in successfully', {
+      position: POSITION.TOP_CENTER,
+      timeout: 2000
     })
   }
 }

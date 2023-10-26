@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watchEffect } from 'vue'
 
 import Image from 'primevue/image'
 import Avatar from 'primevue/Avatar'
@@ -16,8 +16,10 @@ import router from '../../router'
 import { useToast, POSITION } from 'vue-toastification'
 
 import { useUserStore } from '../../stores/user'
+import { useRoute } from 'vue-router'
 import { supabase } from '../../lib/supabase'
 
+const route = useRoute()
 const user = useUserStore()
 const toast = useToast()
 const dietaryRestrictionsOptions = convertConstantsToDropdownOptions(DIETARY_RESTRICTIONS)
@@ -34,9 +36,44 @@ const profile = ref({
   locationDescription: ''
 })
 
+const isLoading = ref(false)
 const selectedFile = ref(null)
 const fileUploadRef = ref()
 const formatedFileName = ref(null)
+
+onMounted(() => {
+  if (route.name === 'Edit Profile') {
+    getProfileData()
+  }
+})
+
+const getProfileData = async () => {
+  const { data, error } = await supabase
+    .from('userProfiles')
+    .select('*')
+    .match({ id: user.currentUser.id })
+    .single()
+
+  // : avatarUrl = item.avatarUrl
+
+  if (error) {
+    console.log('error: ', error)
+    // handle the error
+  } else {
+    console.log('getProfileData: ', data)
+
+    profile.value = {
+      avatarUrl: data.avatarUrl,
+      username: data.username,
+      handle: data.handle,
+      description: data.description,
+      dietaryRestrictions: data.dietaryRestrictions,
+      allergies: data.allergies,
+      locationName: data.locationName,
+      locationDescription: data.locationDescription
+    }
+  }
+}
 
 const getInitials = computed(() => {
   const username = profile.value.username // Access the username property from the ref object
@@ -106,6 +143,7 @@ const handleRemoveFile = async () => {
 
 const handleCreateProfile = async () => {
   console.log('profile created')
+  isLoading.value = true
 
   const { error } = await supabase.from('userProfiles').insert({
     id: user.currentUser.id,
@@ -113,6 +151,7 @@ const handleCreateProfile = async () => {
     username: profile.value.username,
     handle: profile.value.handle,
     description: profile.value.description,
+    dietaryRestrictions: profile.value.dietaryRestrictions,
     allergies: profile.value.allergies,
     locationName: profile.value.locationName,
     locationDescription: profile.value.locationDescription
@@ -124,12 +163,12 @@ const handleCreateProfile = async () => {
       position: POSITION.TOP_CENTER,
       timeout: 2000
     })
+    isLoading.value = false
+    user.profile.username = profile.value.username
     return
   }
 
-  user.fetchUserProfile(user.currentUser.id).then((data) => {
-    user.profile = data
-  })
+  user.profile = await user.fetchUserProfile()
 
   router.push({ name: 'Giveaways' })
 
@@ -137,6 +176,46 @@ const handleCreateProfile = async () => {
     position: POSITION.TOP_CENTER,
     timeout: 5000
   })
+
+  isLoading.value = false
+}
+
+const handleEditProfile = async () => {
+  isLoading.value = true
+
+  const { data, error } = await supabase.from('userProfiles').upsert(
+    [
+      {
+        id: user.currentUser.id,
+        avatarUrl: profile.value.avatarUrl,
+        username: profile.value.username,
+        handle: profile.value.handle,
+        description: profile.value.description,
+        dietaryRestrictions: profile.value.dietaryRestrictions,
+        allergies: profile.value.allergies,
+        locationName: profile.value.locationName,
+        locationDescription: profile.value.locationDescription
+      }
+    ]
+    // { onConflict: ['poster_id', 'listingID'] } // Specify how to handle conflicts
+  )
+
+  if (error) {
+    console.log('editGiveaway error: ', error)
+    toast.error('Edited Profile unsuccessful', {
+      position: POSITION.TOP_CENTER
+    })
+    isLoading.value = false
+  } else {
+    user.profile.username = profile.value.username
+    router.push({ name: 'Profile' })
+    toast.success('Edited Profile successfully', {
+      position: POSITION.TOP_CENTER,
+      timeout: 5000
+    })
+  }
+
+  isLoading.value = false
 }
 const handleBackBtn = () => {
   router.go(-1)
@@ -275,7 +354,22 @@ const handleBackBtn = () => {
 
       <div class="btn-container">
         <Button @click="handleBackBtn" label="Cancel" severity="warning" outlined rounded />
-        <Button @click="handleCreateProfile" label="Create Profile" severity="warning" rounded />
+        <Button
+          v-if="route.name === 'Create Profile'"
+          @click="handleCreateProfile"
+          :disabled="isLoading"
+          label="Create Profile"
+          severity="warning"
+          rounded
+        />
+        <Button
+          v-if="route.name === 'Edit Profile'"
+          @click="handleEditProfile"
+          :disabled="isLoading"
+          label="Edit Profile"
+          severity="warning"
+          rounded
+        />
       </div>
 
       <!-- <Stepper>
@@ -339,6 +433,7 @@ const handleBackBtn = () => {
   margin-bottom: 40px;
   max-width: 650px;
   /* border: solid; */
+  padding: 0 20px;
 }
 
 .container-basic-information,

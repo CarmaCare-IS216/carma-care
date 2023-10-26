@@ -77,7 +77,7 @@ const getGiveawayDetailData = async () => {
     .select(
       'poster_id,listingID,listingType, listingDesc, postingTime, locationAddress, locationDesc, category, dietaryRestrictions, allergens, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl, allergies)'
     )
-    .match({ listingID: route.params.id, poster_id: user.currentUser.id })
+    .match({ listingID: route.params.id })
     .single()
 
   // : avatarUrl = item.avatarUrl
@@ -404,7 +404,7 @@ section.giveaway-detail-top .giveaway-cta-btn {
   height: auto;
   max-width: 150px;
   max-height: 150px;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 25px;
   box-shadow: 0 7px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease-in-out;
@@ -614,7 +614,7 @@ section.giveaway-detail-top .giveaway-cta-btn {
 
   .giveaway-image-carousel {
     width: 90%;
-    margin-top: 30px;
+    /* margin-top: 30px; */
   }
 }
 

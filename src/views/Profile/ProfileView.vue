@@ -2,11 +2,10 @@
 import Tab from '../../components/Tab/Tab.vue'
 import TabsWrapper from '../../components/Tab/TabsWrapper.vue'
 import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
-import Button from 'primevue/Button';
-import Avatar from 'primevue/Avatar';
-import Dialog from 'primevue/dialog';
-import Tag from 'primevue/tag';
-import Chart from 'primevue/chart';
+import Button from 'primevue/Button'
+import Avatar from 'primevue/Avatar'
+import Dialog from 'primevue/dialog'
+import Tag from 'primevue/tag'
 import { ref, onMounted } from 'vue'
 import { LISTING_TYPE } from '../../util/constants'
 
@@ -25,16 +24,19 @@ const num_requests = ref(0)
 // Fetch user listings from db for giveaway and request count
 async function getListings() {
   // get all listings from this user
-  const { data, error } = await supabase.from('listings').select('*').eq('poster_id', profileInfo.value.id)
+  const { data, error } = await supabase
+    .from('listings')
+    .select('*')
+    .eq('poster_id', profileInfo.value.id)
 
   if (error) {
     console.log('error: ', error)
   } else {
     // filter out the giveaways and requests
-    var giveaways = data.filter(listing => {
+    var giveaways = data.filter((listing) => {
       return listing.listingType === LISTING_TYPE.Giveaway
     })
-    var requests = data.filter(listing => {
+    var requests = data.filter((listing) => {
       return listing.listingType === LISTING_TYPE.Request
     })
     num_giveaways.value = giveaways.length
@@ -189,19 +191,28 @@ let toggleModal = () => {
         <Avatar v-else :label="`${profileInfo?.username ? profileInfo.username.charAt(0).toUpperCase() : ''}`"
           class="profile-photo" shape="circle" />
         <div class="profile-info">
-          <div style="display: flex; justify-content: space-between; padding-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; padding-bottom: 20px">
             <div>
               <h1>{{ profileInfo.username }}</h1>
               <p style="color: var(--color-primary)">@{{ profileInfo.handle }}</p>
             </div>
-            <Button type="button" class="edit-button" label="Edit Profile" icon="pi pi-cog" />
+            <router-link :to="{ name: 'Edit Profile' }">
+              <Button type="button" class="edit-button" label="Edit Profile" icon="pi pi-cog" />
+            </router-link>
           </div>
           <p style="padding-bottom: 20px;">{{ profileInfo.description }}</p>
           <Button class="dietary-restrictions" @click="dietary_restrictions_visible = true">Dietary Restrictions</Button>
         </div>
         <div class="profile-statistics">
-          <div style="width: fill-available; display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex;">
+          <div
+            style="
+              width: fill-available;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            "
+          >
+            <div style="display: flex">
               <div class="statistics-icon-wrapper">
                 <div><Button class="icon" icon="pi pi-star" /></div>
                 <div>
