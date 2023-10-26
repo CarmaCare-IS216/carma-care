@@ -22,7 +22,7 @@ async function getData(queryData) {
     .from('listings')
     .select(
       'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
-    )
+    ).eq("listingType","Giveaway")
 
   // : avatarUrl = item.avatarUrl
 
@@ -50,7 +50,7 @@ async function getFiltered(condition) {
     .from('listings')
     .select(
       'poster_id,listingID,listingType,allergens, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
-    )
+    ).eq("listingType","Giveaway")
     
   query.in("category",categoryFilter)
 
@@ -123,7 +123,7 @@ async function search(searchData) {
         .from('listings')
         .select(
           'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
-        ).ilike("listingTitle","%"+searchData+"%")
+        ).ilike("listingTitle","%"+searchData+"%").eq("listingType","Giveaway")
 
 
       if (error) {
