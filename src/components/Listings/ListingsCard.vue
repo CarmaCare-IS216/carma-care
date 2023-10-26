@@ -29,27 +29,27 @@ const days = hours / 24
 var timeDiff
 if (days > 1) {
   if (days.toFixed(0) == 1) {
-    timeDiff = days.toFixed(0) + ' day ago'
+    timeDiff = days.toFixed(0) + 'd ago'
   } else {
-    timeDiff = days.toFixed(0) + ' days ago'
+    timeDiff = days.toFixed(0) + 'd ago'
   }
 } else if (hours > 1) {
   if (hours.toFixed(0) == 1) {
-    timeDiff = hours.toFixed(0) + ' hour ago'
+    timeDiff = hours.toFixed(0) + 'h ago'
   } else {
-    timeDiff = hours.toFixed(0) + ' hours ago'
+    timeDiff = hours.toFixed(0) + 'h ago'
   }
 } else if (minutes > 1) {
   if (minutes.toFixed(0) == 1) {
-    timeDiff = minutes.toFixed(0) + ' minute ago'
+    timeDiff = minutes.toFixed(0) + 'min ago'
   } else {
-    timeDiff = minutes.toFixed(0) + ' minutes ago'
+    timeDiff = minutes.toFixed(0) + 'min ago'
   }
 } else if (seconds > 1) {
   if (seconds.toFixed(0) == 1) {
-    timeDiff = seconds.toFixed(0) + ' second ago'
+    timeDiff = seconds.toFixed(0) + 'sec ago'
   } else {
-    timeDiff = seconds.toFixed(0) + ' seconds ago'
+    timeDiff = seconds.toFixed(0) + 'sec ago'
   }
 }
 </script>
@@ -97,19 +97,20 @@ if (days > 1) {
               <!-- card header time goes in here -->
               {{ timeDiff }}
             </span>
-            <span class="card-header-location">
-              <!-- card header location goes in here -->
-              <i class="pi pi-map-marker"></i>
-              {{ locationAddress }}
+            <span class="card-header-location-container">
+              <span class="card-header-location">
+                <!-- card header location goes in here -->
+                <i class="pi pi-map-marker"></i>
+                {{ locationAddress }}
+              </span>
             </span>
           </div>
         </div>
       </div>
 
       <div class="card-image-container">
-        <div class="card-image-item-tag" style="height: 250px">
+        <div class="card-image-item-tag">
           <!-- card image tag goes in here -->
-          <img class="card-image" :src="image" alt="" />
           <Tag
             v-if="category == 'Food'"
             id="tag"
@@ -118,6 +119,8 @@ if (days > 1) {
               margin: 2px, 0, 0, 5px;
               border: solid 1px black;
               color: orange;
+              font-weight: 500;
+              letter-spacing: 0.5px;
               background-color: white;
             "
           ></Tag>
@@ -129,6 +132,8 @@ if (days > 1) {
               margin: 2px, 0, 0, 5px;
               border: solid 1px black;
               color: #6aef42;
+              font-weight: 500;
+              letter-spacing: 0.5px;
               background-color: white;
             "
           ></Tag>
@@ -140,10 +145,13 @@ if (days > 1) {
               margin: 2px, 0, 0, 5px;
               border: solid 1px black;
               color: #679af1;
+              font-weight: 500;
+              letter-spacing: 0.5px;
               background-color: white;
             "
           ></Tag>
         </div>
+        <img class="card-image" :src="image" alt="" />
       </div>
 
       <div class="card-content">
@@ -153,7 +161,13 @@ if (days > 1) {
         </div>
         <div class="card-content-tags">
           <!-- card tags goes in here -->
-          <Tag v-for="(item, index) in tags" :key="index" class="category" :value="item"></Tag>
+          <Tag
+            v-for="(item, index) in tags"
+            :key="index"
+            severity="warning"
+            class="category"
+            :value="item"
+          ></Tag>
         </div>
       </div>
 
@@ -181,10 +195,9 @@ a {
 .listings-card {
   /* max-width: 350px; */
   width: 100%;
-  box-shadow: 0 7px 15px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  border: solid;
-  background-color: #d9d9d9;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 7px 30px rgba(0, 0, 0, 0.1);
 }
 
 #avatar {
@@ -197,6 +210,7 @@ a {
 .card-header {
   display: flex;
   align-items: center;
+  padding: 5px 0px;
 }
 
 .card-header-time {
@@ -205,7 +219,6 @@ a {
 
 .card-header-content {
   width: 100%;
-  margin-right: 5px;
   overflow: hidden;
 }
 
@@ -214,21 +227,68 @@ a {
   justify-content: space-between;
 }
 
-.card-header-bottom {
-  color: grey;
+.card-header-edit-btn {
   display: flex;
-  gap: 10px;
-  width: 230.5px;
-  height: 25px;
+}
+.card-header-edit-btn a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-header-edit-btn i::before {
+  color: var(--color-primary);
+}
+
+.card-header-bottom {
+  color: #a3a3a3;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  /* width: 230.5px; */
+  /* height: 25px; */
+  font-size: 0.85em;
+}
+
+.card-header-location-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.card-header-location {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-header-location i::before {
+  color: var(--color-primary);
 }
 
 .card-header-content {
   height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 10px;
 }
 
 .card-image-container {
   height: 250px;
   overflow: hidden;
+  position: relative;
+}
+.card-image-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(#000, #00000000);
+  height: 30%;
+  opacity: 0.15;
+  z-index: 1;
 }
 .card-image {
   width: 100%;
@@ -242,6 +302,7 @@ a {
 
 .card-image-item-tag {
   position: relative;
+  z-index: 1;
 }
 
 #tag {
@@ -250,30 +311,51 @@ a {
   left: 10px;
 
   padding: 5px;
+  font-weight: 500;
   background-color: white;
-  border: 2px solid red;
+  box-shadow: 0 7px 15px rgba(0, 0, 0, 0.1);
+  border: solid 1px transparent !important;
+}
+#tag span {
+  font-weight: 500 !important;
+}
+
+.card-content {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .card-content-title {
-  margin-left: 5px;
-  margin-top: 10px;
+  font-weight: 500;
+  color: var(--color-primary);
 }
 
 .card-content-tags {
-  gap: 5px;
+  gap: 8px;
   display: flex;
-  margin: 10px 0 10px 5px;
 }
 
 .card-footer {
-  margin: 0 5px 10px 5px;
   display: flex;
   justify-content: space-between;
+  padding: 10px;
+  padding-bottom: 15px;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
 }
 
 .category {
-  border: solid 1px black;
+  /* border: solid 1px black;
   color: grey;
-  background-color: white;
+  background-color: white; */
 }
+
+.card-item-servings i {
+  padding-right: 6px;
+}
+/* .card-item-servings i::before {
+  color: var(--color-primary);
+} */
 </style>
