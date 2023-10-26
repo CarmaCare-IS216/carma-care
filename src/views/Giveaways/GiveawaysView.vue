@@ -101,7 +101,6 @@ async function search(searchData) {
   isSearching.value = true
   if (searchData == undefined) {
     searchData = ''
-
   }
   if (this.timer) {
     clearTimeout(this.timer)
@@ -146,28 +145,28 @@ async function search(searchData) {
     <div>
       <ProgressSpinner class="listings-cards" v-if="isSearching" />
       <div v-else>
-        <h2 class="container listings-cards" style="margin-bottom: 30px">
+        <h4 class="container listings-cards" style="margin-bottom: 0px">
           Showing {{ queryData.length }} result:
-        </h2>
-      </div>
-      <div class="container listings-cards">
-        <ListingsCard
-          v-for="item in queryData"
-          :key="item.listingID"
-          :listingID="item.listingID"
-          :listingType="item.listingType"
-          :username="item.userProfiles.username"
-          :avatarUrl="item.userProfiles.avatarUrl"
-          :postingTime="item.postingTime"
-          :locationAddress="item.locationAddress"
-          :category="item.category"
-          :image="item.images[0]"
-          :listingTitle="item.listingTitle"
-          :tags="item.tags"
-          :status="item.status"
-          :quantityNum="item.quantityNum"
-          :isPoster="item.poster_id == currentUser"
-        />
+        </h4>
+        <div class="container listings-cards">
+          <ListingsCard
+            v-for="item in queryData"
+            :key="item.listingID"
+            :listingID="item.listingID"
+            :listingType="item.listingType"
+            :username="item.userProfiles.username"
+            :avatarUrl="item.userProfiles.avatarUrl"
+            :postingTime="item.postingTime"
+            :locationAddress="item.locationAddress"
+            :category="item.category"
+            :image="item.images[0]"
+            :listingTitle="item.listingTitle"
+            :tags="item.tags"
+            :status="item.status"
+            :quantityNum="item.quantityNum"
+            :isPoster="item.poster_id == currentUser"
+          />
+        </div>
       </div>
     </div>
   </main>
