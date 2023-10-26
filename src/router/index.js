@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 // Views
 import GiveawaysView from '@/views/Giveaways/GiveawaysView.vue'
 import CreateEditGiveawayView from '@/views/Giveaways/CreateEditGiveawayView.vue'
+import GiveawayDetailView from '@/views/Giveaways/GiveawayDetailView.vue'
 
 import RequestsView from '@/views/Requests/RequestsView.vue'
 import CreateEditRequestView from '@/views/Requests/CreateEditRequestView.vue'
@@ -32,8 +33,28 @@ const router = createRouter({
       }
     },
     {
+      path: '/giveaways/:id',
+      name: 'Giveaway Detail',
+      component: GiveawayDetailView,
+      meta: {
+        layout: DefaultLayout
+        // requiresAuth: true
+        // requiresProfile: true
+      }
+    },
+    {
       path: '/giveaways/create',
       name: 'Create Giveaway',
+      component: CreateEditGiveawayView,
+      meta: {
+        layout: DefaultLayout,
+        requiresAuth: true,
+        requiresProfile: true
+      }
+    },
+    {
+      path: '/giveaways/edit/:id',
+      name: 'Edit Giveaway',
       component: CreateEditGiveawayView,
       meta: {
         layout: DefaultLayout,
@@ -136,6 +157,7 @@ async function getUser(next, key, redirectPath) {
 
 async function getUserProfile(next) {
   const user = useUserStore()
+  console.log('userProfile: ', user.currentUser.id)
   if (user.currentUser === null) {
     next('/login')
   }
