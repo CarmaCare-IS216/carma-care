@@ -118,6 +118,43 @@ const setChartOptions = () => {
   };
 }
 
+// // Reviews
+// const reviews = [
+//   {
+//     revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
+//     reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
+//     reviewDate: Date.parse('22 Oct 2023 00:00:00 GMT'),
+//     reviewText: 'Great food!'
+//   },
+//   {
+//     revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
+//     reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
+//     reviewDate: Date.parse('22 Oct 2023 04:00:00 GMT'),
+//     reviewText: 'Great food1!'
+//   },
+//   {
+//     revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
+//     reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
+//     reviewDate: Date.parse('23 Oct 2023 02:00:00 GMT'),
+//     reviewText: 'Great food2!'
+//   }
+// ];
+
+// function custom_sort(a, b) {
+//     return new Date(b.reviewDate).getTime() - new Date(a.reviewDate).getTime();
+// }
+
+// reviews.sort(custom_sort);
+
+// async function getReviewUserInfo() {
+//   for (const review in reviews) {
+//     const { data, error } = await supabase.from('userProfiles').select('username', 'handle', 'avatarUrl').eq('id', review.reviewerID)
+//   }
+// }
+
+
+// console.log(reviews)
+
 // Init on Load page
 onMounted(() => {
   profileInfo.value = user.profile
