@@ -162,5 +162,10 @@ async function search(searchData) {
   </main>
 </template>
 
-<style scoped></style>
+<style scoped>
+.listings-cards{
+  margin-bottom: 50px;
+}
+
+</style>
 
