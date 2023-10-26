@@ -4,10 +4,11 @@ import ListingsCard from '../../components/Listings/ListingsCard.vue'
 import { useUserStore } from '../../stores/user'
 import { supabase } from '@/lib/supabase'
 import { ref, onMounted } from 'vue'
-
+import ProgressSpinner from 'primevue/progressspinner';
 const queryData = ref([])
 const user = useUserStore()
 const currentUser=user.currentUser?.id
+const isSearching=ref()
 // grab user id
 
 onMounted(() => {
@@ -15,6 +16,7 @@ onMounted(() => {
 })
 
 async function getData(queryData) {
+  isSearching.value=true
   // const columnsToSelect='listingType', 'username', 'postingTime', 'locationAddress', 'category', 'image', 'listingTitle', 'tags', 'quantityNum', 'quantityUnit'
   const { data, error } = await supabase
     .from('listings')
@@ -30,12 +32,16 @@ async function getData(queryData) {
   } else {
     // do something with the data (e.g. assign data to an array ref)
     queryData.value=data
+    isSearching.value=false
+
 
   }
 }
 
 
 async function getFiltered(condition) {
+  isSearching.value=true
+
   var categoryFilter=condition.categoryFilter
   var restrictionsFilter=condition.restrictionsFilter
   var allergensFilter=condition.allergensFilter
@@ -84,17 +90,23 @@ async function getFiltered(condition) {
           }
           noAllergens=true
         }
+      isSearching.value=false
+
       return output
 
     }
     else{
+      isSearching.value=false
+
       return data
     }
+    
 
   }
 }
 
 async function search(searchData) {
+  isSearching.value=true
   if(searchData==undefined){
     searchData=""
   }
@@ -105,6 +117,8 @@ async function search(searchData) {
   this.timer = setTimeout(async () => {
       // your code
       // const columnsToSelect='listingType', 'username', 'postingTime', 'locationAddress', 'category', 'image', 'listingTitle', 'tags', 'quantityNum', 'quantityUnit'
+      isSearching.value=true
+
       const { data, error } = await supabase
         .from('listings')
         .select(
@@ -118,6 +132,8 @@ async function search(searchData) {
       } else {
         // do something with the data (e.g. assign data to an array ref)
         queryData.value=data
+        isSearching.value=false
+
       }
 
 
@@ -141,7 +157,14 @@ async function search(searchData) {
       searchBarPlaceholder="Search Giveaways"
       createButtonRouteName="Create Giveaway"
     />
-    <div class="container listings-cards">
+    <div>
+    <ProgressSpinner class="listings-cards" v-if="isSearching"/>
+    <div  v-else>
+
+        <h2 class="listings-cards" style="margin-bottom: 30px;">Showing {{ queryData.length }} result:</h2>
+      
+    </div>
+    <div  class="container listings-cards">
       <ListingsCard
         v-for="item in queryData"
         :key="item.listingID"
@@ -159,6 +182,11 @@ async function search(searchData) {
         :isPoster="item.poster_id==currentUser"
       />
     </div>
+
+
+
+    </div>
+    
   </main>
 </template>
 
