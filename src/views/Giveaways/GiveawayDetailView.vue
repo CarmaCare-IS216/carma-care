@@ -12,6 +12,7 @@ import Flicking from '@egjs/vue3-flicking'
 import Tag from 'primevue/tag'
 
 import CardContainer from '../../components/CardContainer/CardContainer.vue'
+import Map from '../../components/Map.vue'
 
 import {
   LISTING_TYPE,
@@ -49,7 +50,8 @@ const form = ref({
   images: [],
   quantityNum: '',
   locationAddress: '',
-  locationDescription: ''
+  locationDescription: '',
+  locationCoords: ''
 })
 
 const renderTextContent = (value) => {
@@ -65,7 +67,7 @@ const getGiveawayDetailData = async () => {
   const { data, error } = await supabase
     .from('listings')
     .select(
-      'poster_id,listingID,listingType, listingDesc, postingTime, locationAddress, locationDesc, category, dietaryRestrictions, allergens, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl, allergies)'
+      'poster_id,listingID,listingType, listingDesc, postingTime, locationAddress, locationDesc, locationCoords, category, dietaryRestrictions, allergens, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl, allergies)'
     )
     .match({ listingID: route.params.id })
     .single()
@@ -94,12 +96,13 @@ const getGiveawayDetailData = async () => {
       images: data.images || [],
       quantityNum: data.quantityNum || '',
       locationAddress: data.locationAddress || '',
-      locationDescription: data.locationDesc || ''
+      locationDescription: data.locationDesc || '',
+      locationCoords: JSON.parse(data.locationCoords) || ''
     }
 
     bgOverlay.value = data.images[0]
 
-    console.log('giveaway detail data: ', data)
+    console.log('giveaway detail data: ', form.value)
   }
 }
 
@@ -267,7 +270,8 @@ const imageCarouselSetup = () => {
               </div>
               <div class="giveaway-item-time-distance">14km away from your location</div>
             </span>
-            <div class="map">Embed Google Maps API</div>
+            <!-- <div class="map">Embed Google Maps API</div> -->
+            <Map :locationCoords="form.locationCoords" />
           </div>
         </div>
 
@@ -534,16 +538,6 @@ section.giveaway-detail-top .giveaway-cta-btn {
 }
 .giveaway-item-time-distance {
   color: var(--color-primary);
-}
-
-.map {
-  width: 100%;
-  height: 300px;
-  background: gray;
-  border-radius: 25px;
-  display: grid;
-  place-items: center;
-  margin-top: 20px;
 }
 
 .giver-information {
