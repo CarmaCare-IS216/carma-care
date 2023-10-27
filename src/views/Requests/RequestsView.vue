@@ -25,6 +25,7 @@ async function getData(queryData) {
     )
     .eq('listingType', 'Request')
     .order('postingTime', { ascending: false })
+
   // : avatarUrl = item.avatarUrl
 
   if (error) {
@@ -50,13 +51,14 @@ async function getFiltered(condition) {
       'poster_id,listingID,listingType,allergens, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
     )
     .eq('listingType', 'Request')
-    .order('postingTime', { ascending: false })
+    .order('postingTime', { ascending: true })
+
   query.in('category', categoryFilter)
 
   if (restrictionsFilter != 'Null') {
     query.eq('dietaryRestrictions', restrictionsFilter)
   }
-
+  query.order('postingTime', { ascending: false })
   const { data, error } = await query
 
   if (error) {
@@ -117,6 +119,7 @@ async function search(searchData) {
       .ilike('listingTitle', '%' + searchData + '%')
       .eq('listingType', 'Request')
       .order('postingTime', { ascending: false })
+
     if (error) {
       console.log('error: ', error)
       // handle the error
@@ -132,37 +135,38 @@ async function search(searchData) {
 <!-- play with time data -->
 
 <template>
-  <main class="giveaways">
+  <main class="requests">
     <ListingsHeader
       @passQuery="async (query) => (queryData = await getFiltered(query))"
       @passSearch="async (query) => (queryData = await search(query))"
-      searchBarPlaceholder="Search Request"
+      searchBarPlaceholder="Search Requests"
       createButtonRouteName="Create Request"
     />
     <div>
       <ProgressSpinner class="listings-cards" v-if="isSearching" />
       <div v-else>
-        <h2 class="container listings-cards" style="margin-bottom: 30px">
+        <h4 class="container listings-cards" style="margin-bottom: 0px">
           Showing {{ queryData.length }} result:
-        </h2>
-      </div>
-      <div class="container listings-cards">
-        <ListingsCard
-          v-for="item in queryData"
-          :key="item.listingID"
-          :listingType="item.listingType"
-          :username="item.userProfiles.username"
-          :avatarUrl="item.userProfiles.avatarUrl"
-          :postingTime="item.postingTime"
-          :locationAddress="item.locationAddress"
-          :category="item.category"
-          :image="item.images[0]"
-          :listingTitle="item.listingTitle"
-          :tags="item.tags"
-          :status="item.status"
-          :quantityNum="item.quantityNum"
-          :isPoster="item.poster_id == currentUser"
-        />
+        </h4>
+        <div class="container listings-cards">
+          <ListingsCard
+            v-for="item in queryData"
+            :key="item.listingID"
+            :listingID="item.listingID"
+            :listingType="item.listingType"
+            :username="item.userProfiles.username"
+            :avatarUrl="item.userProfiles.avatarUrl"
+            :postingTime="item.postingTime"
+            :locationAddress="item.locationAddress"
+            :category="item.category"
+            :image="item.images[0]"
+            :listingTitle="item.listingTitle"
+            :tags="item.tags"
+            :status="item.status"
+            :quantityNum="item.quantityNum"
+            :isPoster="item.poster_id == currentUser"
+          />
+        </div>
       </div>
     </div>
   </main>

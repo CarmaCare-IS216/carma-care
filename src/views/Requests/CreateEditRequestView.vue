@@ -89,6 +89,7 @@ const getRequestData = async () => {
   } else {
     // do something with the data (e.g. assign data to an array ref)
     // queryData.value = data
+    console.log(data)
     form.value = {
       posterID: data.poster_id,
       username: data.userProfiles.username,
