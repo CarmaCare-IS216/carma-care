@@ -1,4 +1,5 @@
 <script setup>
+/* eslint-disable no-undef */
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import router from '../../router'
@@ -41,6 +42,7 @@ const user = useUserStore()
 const isLoading = ref(false)
 const imageFiles = ref([])
 const showPreview = ref(false)
+const locationAddressRef = ref()
 const form = ref({
   posterID: user.currentUser.id,
   username: user.profile?.username,
@@ -55,7 +57,8 @@ const form = ref({
   images: [],
   quantityNum: '',
   locationAddress: '',
-  locationDescription: ''
+  locationDescription: '',
+  locationCoords: ''
 })
 
 onMounted(async () => {
@@ -89,6 +92,7 @@ const getGiveawayData = async () => {
   } else {
     // do something with the data (e.g. assign data to an array ref)
     // queryData.value = data
+    console.log('form.valueee:: ', form.value)
     form.value = {
       posterID: data.poster_id,
       username: data.userProfiles.username,
@@ -103,7 +107,8 @@ const getGiveawayData = async () => {
       images: data.images || [],
       quantityNum: data.quantityNum || '',
       locationAddress: data.locationAddress || '',
-      locationDescription: data.locationDesc || ''
+      locationDescription: data.locationDesc || '',
+      locationCoords: data.locationCoords != undefined ? JSON.parse(data.locationCoords) : ''
     }
   }
 }
@@ -160,7 +165,8 @@ const handleCreateGiveaway = async () => {
     images: form.value.images,
     quantityNum: form.value.quantityNum,
     locationAddress: form.value.locationAddress,
-    locationDesc: form.value.locationDescription
+    locationDesc: form.value.locationDescription,
+    locationCoords: JSON.stringify(form.value.locationCoords)
   })
 
   if (error) {
@@ -225,6 +231,44 @@ const handleEditGiveaway = async () => {
 const handleUploadImages = (images) => {
   imageFiles.value = images.value
 }
+
+const gmapLink = `https://maps.googleapis.com/maps/api/js?key=${
+  import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+}&libraries=places`
+
+onMounted(() => {
+  new Promise((resolve, reject) => {
+    let googleScript = document.querySelector(`script[src="${gmapLink}"]`)
+
+    if (!googleScript) {
+      googleScript = document.createElement('script')
+      googleScript.src = gmapLink
+      googleScript.async = true
+      document.head.append(googleScript)
+
+      googleScript.addEventListener('error', () => {
+        reject()
+      })
+
+      googleScript.addEventListener('load', () => {
+        resolve()
+      })
+    }
+  }).then(() => {
+    const autocomplete = new google.maps.places.Autocomplete(locationAddressRef.value, {
+      types: ['address']
+    })
+
+    google.maps.event.addListener(autocomplete, 'place_changed', () => {
+      const place = autocomplete.getPlace()
+      const lat = place.geometry.location.lat()
+      const lng = place.geometry.location.lng()
+      console.log(`place received: lat: ${lat}, lng: ${lng}`)
+      form.value.locationCoords = { lat, lng }
+      console.log('form.locationCoords: ', form.value.locationCoords)
+    })
+  })
+})
 
 const tabletScreen = useMatchMedia(screenSize.tablet)
 </script>
@@ -363,10 +407,44 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
 
             <CardContainer title="Location Information">
               <div class="location-information">
-                <span class="p-float-label location">
-                  <InputText v-model="form.locationAddress" class="w-full" />
+                <!-- <span class="p-float-label location">
+                  <InputText
+                    v-model="form.locationAddress"
+                    class="w-full"
+                  />
                   <label>Location Address</label>
-                </span>
+                </span> -->
+                <!-- <span class="p-float-label location">
+                  <InputText
+                    ref="locationAddressRef"
+                    v-model="form.locationAddress"
+                    class="w-full"
+                  />
+                  <input
+                    type="text"
+                    ref="locationAddressRef"
+                    v-model="form.locationAddress"
+                    class="w-full"
+                  />
+                  <label>Location Address</label>
+                </span> -->
+                {{ form.locationCoords }}
+                <input
+                  style="
+                    font-family: inherit;
+                    font-feature-settings: inherit;
+                    font-size: 1rem;
+                    color: #495057;
+                    background: #ffffff;
+                    padding: 0.75rem 0.75rem;
+                    border: 1px solid #ced4da;
+                    border-radius: 6px;
+                  "
+                  type="text"
+                  ref="locationAddressRef"
+                  v-model="form.locationAddress"
+                  class="w-full"
+                />
 
                 <span class="p-float-label giveaway-location-description">
                   <Textarea
