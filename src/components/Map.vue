@@ -65,14 +65,18 @@ watch([mapDiv, currPos], () => {
   // console.log("latlng: ", currentLocation.latLng);
   if (marker) marker.setMap(null)
   if (mapDiv.value) {
+    // Update the map center
+    const newCenter = new google.maps.LatLng(currPos.value.lat, currPos.value.lng)
+    mapDiv.value.setCenter(newCenter)
+
     marker = new google.maps.Marker({
       position: currPos.value,
       map: mapDiv.value
     })
 
-    // isDisabled.value = false;
+    console.log('watch position: ', currPos.value)
 
-    marker.setMap(mapDiv.value)
+    // isDisabled.value = false;
   }
 })
 </script>
