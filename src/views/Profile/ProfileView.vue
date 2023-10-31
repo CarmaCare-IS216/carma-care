@@ -6,6 +6,7 @@ import Button from 'primevue/Button'
 import Avatar from 'primevue/Avatar'
 import Dialog from 'primevue/dialog'
 import Tag from 'primevue/tag'
+import Chart from 'primevue/chart';
 import { ref, onMounted } from 'vue'
 import { LISTING_TYPE } from '../../util/constants'
 
@@ -68,9 +69,9 @@ let getMonthsArr = () => {
     };
   }
 
-  for (var i = 0; i < numOfMonths ; ++i) {
-    dateStrings.unshift(dateObj.toLocaleString('en-US', dateFormatOptions));
+  for (var i = 0; i < numOfMonths ; i++) {
     dateObj.setMonth(dateObj.getMonth() - 1);
+    dateStrings.unshift(dateObj.toLocaleString('en-US', dateFormatOptions));
   }
 
   return dateStrings;
