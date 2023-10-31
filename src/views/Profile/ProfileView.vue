@@ -121,53 +121,35 @@ const setChartOptions = () => {
   };
 }
 
-// temp reviews
-const reviews = [
-  {
-    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-    reviewDate: Date.parse('22 Oct 2023 00:00:00 GMT'),
-    reviewText: 'Great food!'
-  },
-  {
-    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-    reviewDate: Date.parse('24 Oct 2023 04:00:00 GMT'),
-    reviewText: 'Great food1!'
-  },
-  {
-    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-    reviewDate: Date.parse('24 Oct 2023 04:00:00 GMT'),
-    reviewText: 'Great food1!'
-  },
-  {
-    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-    reviewDate: Date.parse('24 Oct 2023 04:00:00 GMT'),
-    reviewText: 'Great food1!'
-  },
-  {
-    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-    reviewDate: Date.parse('24 Oct 2023 04:00:00 GMT'),
-    reviewText: 'Great food1!'
-  },
-  {
-    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-    reviewDate: Date.parse('23 Oct 2023 02:00:00 GMT'),
-    reviewText: 'Great food2!'
+// Reviews
+const reviews = ref();
+
+// Fetch user reviews from db
+async function getReviews() {
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*')
+    .eq('revieweeID', profileInfo.value.id)
+
+  if (error) {
+    console.log('error: ', error)
+  } else {
+    console.log(data)
+    console.log(JSON.parse(JSON.stringify(data)))
+    reviews.value = JSON.parse(JSON.stringify(data))
   }
-];
+  getReviewUserInfo()
+  console.log(reviews.value)
+}
 
 function custom_sort(a, b) {
-  return new Date(b.reviewDate).getTime() - new Date(a.reviewDate).getTime();
+  return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
 }
 
 // retrieve reviewer information and sort
 async function getReviewUserInfo() {
-  for (const review of reviews) {
+  for (const review of reviews.value) {
+    console.log(review)
     const { data, error } = await supabase.from('userProfiles').select('*').eq('id', review.reviewerID)
 
     if (error) {
@@ -179,11 +161,8 @@ async function getReviewUserInfo() {
     }
   }
 
-  reviews.sort(custom_sort);
+  reviews.value.sort(custom_sort)
 }
-
-
-console.log(reviews)
 
 // Init on Load page
 onMounted(() => {
@@ -193,7 +172,7 @@ onMounted(() => {
   carmaData.value = setCarmaData();
   chartData.value = setChartData();
   chartOptions.value = setChartOptions();
-  getReviewUserInfo()
+  getReviews()
 })
 
 // Breakpoint for responsiveness
