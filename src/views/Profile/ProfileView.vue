@@ -69,7 +69,7 @@ let getMonthsArr = () => {
     };
   }
 
-  for (var i = 0; i < numOfMonths ; i++) {
+  for (var i = 0; i < numOfMonths; i++) {
     dateObj.setMonth(dateObj.getMonth() - 1);
     dateStrings.unshift(dateObj.toLocaleString('en-US', dateFormatOptions));
   }
@@ -78,7 +78,7 @@ let getMonthsArr = () => {
 }
 
 const setCarmaData = () => {
-  var history = profileInfo?.value.carmaHistory ? [... profileInfo.value.carmaHistory] : []
+  var history = profileInfo?.value.carmaHistory ? [...profileInfo.value.carmaHistory] : []
   history.push(profileInfo.value.monthlyCarma)
 
   return history;
@@ -121,42 +121,69 @@ const setChartOptions = () => {
   };
 }
 
-// // Reviews
-// const reviews = [
-//   {
-//     revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-//     reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-//     reviewDate: Date.parse('22 Oct 2023 00:00:00 GMT'),
-//     reviewText: 'Great food!'
-//   },
-//   {
-//     revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-//     reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-//     reviewDate: Date.parse('22 Oct 2023 04:00:00 GMT'),
-//     reviewText: 'Great food1!'
-//   },
-//   {
-//     revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-//     reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-//     reviewDate: Date.parse('23 Oct 2023 02:00:00 GMT'),
-//     reviewText: 'Great food2!'
-//   }
-// ];
+// temp reviews
+const reviews = [
+  {
+    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
+    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
+    reviewDate: Date.parse('22 Oct 2023 00:00:00 GMT'),
+    reviewText: 'Great food!'
+  },
+  {
+    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
+    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
+    reviewDate: Date.parse('24 Oct 2023 04:00:00 GMT'),
+    reviewText: 'Great food1!'
+  },
+  {
+    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
+    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
+    reviewDate: Date.parse('24 Oct 2023 04:00:00 GMT'),
+    reviewText: 'Great food1!'
+  },
+  {
+    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
+    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
+    reviewDate: Date.parse('24 Oct 2023 04:00:00 GMT'),
+    reviewText: 'Great food1!'
+  },
+  {
+    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
+    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
+    reviewDate: Date.parse('24 Oct 2023 04:00:00 GMT'),
+    reviewText: 'Great food1!'
+  },
+  {
+    revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
+    reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
+    reviewDate: Date.parse('23 Oct 2023 02:00:00 GMT'),
+    reviewText: 'Great food2!'
+  }
+];
 
-// function custom_sort(a, b) {
-//     return new Date(b.reviewDate).getTime() - new Date(a.reviewDate).getTime();
-// }
+function custom_sort(a, b) {
+  return new Date(b.reviewDate).getTime() - new Date(a.reviewDate).getTime();
+}
 
-// reviews.sort(custom_sort);
+// retrieve reviewer information and sort
+async function getReviewUserInfo() {
+  for (const review of reviews) {
+    const { data, error } = await supabase.from('userProfiles').select('*').eq('id', review.reviewerID)
 
-// async function getReviewUserInfo() {
-//   for (const review in reviews) {
-//     const { data, error } = await supabase.from('userProfiles').select('username', 'handle', 'avatarUrl').eq('id', review.reviewerID)
-//   }
-// }
+    if (error) {
+      console.log('error: ', error)
+    } else {
+      review.reviewerUsername = data[0].username
+      review.reviewerHandle = data[0].handle
+      review.reviewerAvatarUrl = data[0].avatarUrl
+    }
+  }
+
+  reviews.sort(custom_sort);
+}
 
 
-// console.log(reviews)
+console.log(reviews)
 
 // Init on Load page
 onMounted(() => {
@@ -166,6 +193,7 @@ onMounted(() => {
   carmaData.value = setCarmaData();
   chartData.value = setChartData();
   chartOptions.value = setChartOptions();
+  getReviewUserInfo()
 })
 
 // Breakpoint for responsiveness
@@ -205,14 +233,12 @@ let toggleModal = () => {
           <Button class="dietary-restrictions" @click="dietary_restrictions_visible = true">Dietary Restrictions</Button>
         </div>
         <div class="profile-statistics">
-          <div
-            style="
+          <div style="
               width: fill-available;
               display: flex;
               align-items: center;
               justify-content: space-between;
-            "
-          >
+            ">
             <div style="display: flex">
               <div class="statistics-icon-wrapper">
                 <div><Button class="icon" icon="pi pi-star" /></div>
@@ -251,7 +277,8 @@ let toggleModal = () => {
     </section>
   </main>
 
-  <div v-if="dietary_restrictions_visible || statistics_visible" class="profile-view profile-view-modal" @click="toggleModal"></div>
+  <div v-if="dietary_restrictions_visible || statistics_visible" class="profile-view profile-view-modal"
+    @click="toggleModal"></div>
   <Dialog :visible="dietary_restrictions_visible" :draggable="false"
     :header="`${profileInfo.username}'s Dietary Restrictions`" :style="{ width: '50vw' }" class="
     profile-view">
@@ -275,20 +302,38 @@ let toggleModal = () => {
     <TabsWrapper>
       <Tab icon="pi-hourglass" title="Carma">
         <div class="container pt-small">
-          <!-- <div> -->
-          <h3 style="text-align: center;">All-time Carma:<span style="font-size: 1.2rem; color: var(--color-primary)"><i style="margin: 0 5px;"
-                class="pi pi-hourglass"></i>{{ profileInfo.totalCarma }}</span></h3>
-          <h3 style="text-align: center;">Carma this month:<span style="font-size: 1.2rem; color: var(--color-primary)"><i style="margin: 0 5px;"
+          <h3 style="text-align: center;">All-time Carma:<span style="font-size: 1.2rem; color: var(--color-primary)"><i
+                style="margin: 0 5px;" class="pi pi-hourglass"></i>{{ profileInfo.totalCarma }}</span></h3>
+          <h3 style="text-align: center;">Carma earned this month:<span
+              style="font-size: 1.2rem; color: var(--color-primary)"><i style="margin: 0 5px;"
                 class="pi pi-hourglass"></i>{{ profileInfo.monthlyCarma }}</span></h3>
           <br />
           <div>
-            <Chart type="bar" :data="chartData" :options="chartOptions" :canvasProps="{'display': 'flex'}"/>
+            <Chart type="bar" :data="chartData" :options="chartOptions" :canvasProps="{ 'display': 'flex' }" />
           </div>
         </div>
       </Tab>
       <Tab icon="pi-thumbs-up" title="Reviews">
         <div class="container pt-small">
-          <h3>Reviews</h3>
+          <div class="review-card" v-for="(review, index) in reviews" :key="index">
+            <div class="review-header">
+              <div>
+                <Avatar v-if="review.reviewerAvatarUrl != null" id="avatar" class="mr-2" size="large" shape="circle"
+                  :image="review.reviewerAvatarUrl" />
+                <Avatar v-else id="avatar" class="mr-2" size="large" shape="circle"
+                  :label="review.reviewerUsername?.[0].toUpperCase()" />
+              </div>
+              <div>
+                <div>
+                  <h3>{{ review.reviewerUsername }}</h3>
+                  <p style="color: grey; font-size: 14px">@{{ review.reviewerHandle }}</p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <p>{{ review.reviewText }}</p>
+            </div>
+          </div>
         </div>
       </Tab>
     </TabsWrapper>
@@ -296,7 +341,7 @@ let toggleModal = () => {
 </template>
 
 <style>
-.profile-view  canvas {
+.profile-view canvas {
   display: initial !important;
   width: 100% !important;
   height: 50% !important;
@@ -323,6 +368,15 @@ let toggleModal = () => {
   background: rgba(0, 0, 0, 0.5);
   width: 100%;
   height: 100%;
+}
+
+.profile-view .review-header {
+  display: flex;
+  margin-bottom: 4px;
+}
+
+.profile-view .review-card {
+  margin: 16px 0;
 }
 
 .profile-view .tag {
@@ -436,4 +490,5 @@ Overriding PrimeVue's tab component styles
 
 .profile-view .tabview-custom>a {
   width: 170px !important;
-}</style>
+}
+</style>
