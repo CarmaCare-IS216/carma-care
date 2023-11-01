@@ -1,6 +1,7 @@
 <script setup>
 import Tab from '../../components/Tab/Tab.vue'
 import TabsWrapper from '../../components/Tab/TabsWrapper.vue'
+import ListingsCard from '../../components/listings/ListingsCard.vue'
 import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
 import Button from 'primevue/Button'
 import Avatar from 'primevue/Avatar'
@@ -19,8 +20,37 @@ import { useUserStore } from '../../stores/user'
 // user info consts from db
 const user = useUserStore()
 const profileInfo = ref({})
+const giveaways = ref()
+const requests = ref()
 const num_giveaways = ref(0)
 const num_requests = ref(0)
+
+// Carma chart
+const chartData = ref();
+const chartOptions = ref();
+const chartMonths = ref();
+const carmaData = ref();
+
+// Reviews
+const reviews = ref();
+
+// Breakpoint for responsiveness
+const tabletScreen = useMatchMedia(screenSize.tablet)
+
+// For modals
+var dietary_restrictions_visible = ref(false);
+var statistics_visible = ref(false);
+
+// Init on Load page
+onMounted(() => {
+  profileInfo.value = user.profile
+  getListings()
+  chartMonths.value = getMonthsArr();
+  carmaData.value = setCarmaData();
+  chartData.value = setChartData();
+  chartOptions.value = setChartOptions();
+  getReviews()
+})
 
 // Fetch user listings from db for giveaway and request count
 async function getListings() {
@@ -34,22 +64,19 @@ async function getListings() {
     console.log('error: ', error)
   } else {
     // filter out the giveaways and requests
-    var giveaways = data.filter((listing) => {
+    var own_giveaways = data.filter((listing) => {
       return listing.listingType === LISTING_TYPE.Giveaway
     })
-    var requests = data.filter((listing) => {
+    var own_requests = data.filter((listing) => {
       return listing.listingType === LISTING_TYPE.Request
     })
-    num_giveaways.value = giveaways.length
-    num_requests.value = requests.length
+
+    giveaways.value = own_giveaways
+    num_giveaways.value = own_giveaways.length
+    requests.value = own_requests
+    num_requests.value = own_requests.length
   }
 }
-
-// Carma chart
-const chartData = ref();
-const chartOptions = ref();
-const chartMonths = ref();
-const carmaData = ref();
 
 let getMonthsArr = () => {
   var dateObj = new Date();
@@ -121,9 +148,6 @@ const setChartOptions = () => {
   };
 }
 
-// Reviews
-const reviews = ref();
-
 // Fetch user reviews from db
 async function getReviews() {
   const { data, error } = await supabase
@@ -134,14 +158,12 @@ async function getReviews() {
   if (error) {
     console.log('error: ', error)
   } else {
-    console.log(data)
-    console.log(JSON.parse(JSON.stringify(data)))
-    reviews.value = JSON.parse(JSON.stringify(data))
+    reviews.value = data
   }
   getReviewUserInfo()
-  console.log(reviews.value)
 }
 
+// sorting function for sorting reviews by date
 function custom_sort(a, b) {
   return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
 }
@@ -149,7 +171,6 @@ function custom_sort(a, b) {
 // retrieve reviewer information and sort
 async function getReviewUserInfo() {
   for (const review of reviews.value) {
-    console.log(review)
     const { data, error } = await supabase.from('userProfiles').select('*').eq('id', review.reviewerID)
 
     if (error) {
@@ -164,23 +185,6 @@ async function getReviewUserInfo() {
   reviews.value.sort(custom_sort)
 }
 
-// Init on Load page
-onMounted(() => {
-  profileInfo.value = user.profile
-  getListings()
-  chartMonths.value = getMonthsArr();
-  carmaData.value = setCarmaData();
-  chartData.value = setChartData();
-  chartOptions.value = setChartOptions();
-  getReviews()
-})
-
-// Breakpoint for responsiveness
-const tabletScreen = useMatchMedia(screenSize.tablet)
-
-// For modals
-var dietary_restrictions_visible = ref(false);
-var statistics_visible = ref(false);
 let toggleModal = () => {
   if (dietary_restrictions_visible.value) {
     dietary_restrictions_visible.value = !dietary_restrictions_visible.value;
@@ -247,10 +251,48 @@ let toggleModal = () => {
     <section class="my-listings">
       <TabsWrapper>
         <Tab icon="pi-gift" title="Giveaways">
-          <div class="container pt-small">Giveaways</div>
+          <div class="container pt-small">
+            <h3 v-if="giveaways.length == 0">No Giveaways Yet</h3>
+            <ListingsCard
+              v-for="item in giveaways"
+              :key="item.listingID"
+              :listingID="item.listingID"
+              :listingType="item.listingType"
+              :username="profileInfo.username"
+              :avatarUrl="profileInfo.avatarUrl"
+              :postingTime="item.postingTime"
+              :locationAddress="item.locationAddress"
+              :category="item.category"
+              :image="item.images[0]"
+              :listingTitle="item.listingTitle"
+              :tags="item.tags"
+              :status="item.status"
+              :quantityNum="item.quantityNum"
+              :isPoster="true"
+            />
+          </div>
         </Tab>
         <Tab icon="pi-megaphone" title="Requests">
-          <div class="container pt-small">Requests</div>
+          <div class="container pt-small">
+            <h3 v-if="requests.length == 0">No Requests Yet</h3>
+            <ListingsCard
+              v-for="item in requests"
+              :key="item.listingID"
+              :listingID="item.listingID"
+              :listingType="item.listingType"
+              :username="profileInfo.username"
+              :avatarUrl="profileInfo.avatarUrl"
+              :postingTime="item.postingTime"
+              :locationAddress="item.locationAddress"
+              :category="item.category"
+              :image="item.images[0]"
+              :listingTitle="item.listingTitle"
+              :tags="item.tags"
+              :status="item.status"
+              :quantityNum="item.quantityNum"
+              :isPoster="true"
+            />
+          </div>
         </Tab>
       </TabsWrapper>
     </section>
