@@ -277,7 +277,7 @@ let toggleModal = () => {
     </div>
   </Dialog>
   <Dialog :visible="statistics_visible" :draggable="false" :header="`${profileInfo.username}'s Activity`"
-    :style="{ width: '50vw' }" class="profile-view">
+    :style="{ width: '50vw', height: '75%' }" class="profile-view">
     <TabsWrapper>
       <Tab icon="pi-hourglass" title="Carma">
         <div class="container pt-small">
@@ -355,7 +355,11 @@ let toggleModal = () => {
 }
 
 .profile-view .review-card {
-  margin: 16px 0;
+  margin-bottom: 30px;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 5px 5px rgba(246, 132, 56, 0.3);
+  border: 1px solid rgba(246, 132, 56, 0.3);
 }
 
 .profile-view .tag {
@@ -374,7 +378,7 @@ let toggleModal = () => {
   display: flex;
   width: 100%;
   height: 100%;
-  background: whitesmoke;
+  background: rgba(246, 132, 56, 0.03);
   padding: 20px;
   display: flex;
   justify-content: center;
