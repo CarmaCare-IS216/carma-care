@@ -328,7 +328,8 @@ a {
 
 .card-content-title {
   font-weight: 500;
-  color: var(--color-primary);
+  font-size: 1.1em;
+  color: #333;
 }
 
 .card-content-tags {
