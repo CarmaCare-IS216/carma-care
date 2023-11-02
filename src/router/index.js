@@ -177,6 +177,7 @@ async function getUserProfile(next, toFullPath) {
   if (user.currentUser && user.profile && toFullPath !== '/profile/create') {
     next()
   } else {
+    console.log('NO PROFILE')
     next('/')
   }
 }

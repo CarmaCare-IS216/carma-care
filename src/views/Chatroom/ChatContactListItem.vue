@@ -4,30 +4,35 @@ import { defineProps, toRefs, ref } from 'vue'
 import Avatar from 'primevue/Avatar'
 import Badge from 'primevue/Badge'
 
+import { useChatStore } from '../../stores/chat'
+
 const props = defineProps({
   avatarImage: String || null,
   contactName: String,
   lastMessage: String,
   lastMessageTime: String,
-  lastMessageCount: Number,
-  selectedContactName: String
+  lastMessageCount: Number
 })
 
-const {
-  avatarImage,
-  contactName,
-  lastMessage,
-  lastMessageTime,
-  lastMessageCount,
-  selectedContactName
-} = toRefs(props)
+const chat = useChatStore()
+
+const { avatarImage, contactName, lastMessage, lastMessageTime, lastMessageCount } = toRefs(props)
 </script>
 
 <template>
-  <li class="chat-list-item" :class="{ 'selected-contact': contactName === selectedContactName }">
+  <li
+    class="chat-list-item"
+    :class="{ 'selected-contact': contactName === chat.selectedContact?.username }"
+  >
     <div class="chat-list-item-avatar">
       <Avatar v-if="avatarImage" :image="avatarImage" shape="circle" size="large" />
-      <Avatar v-else label="P" shape="circle" size="large" />
+      <Avatar
+        v-else
+        :label="contactName?.[0]"
+        shape="circle"
+        size="large"
+        style="background: var(--color-primary); color: white"
+      />
     </div>
     <div class="chat-list-item-content">
       <div class="chat-list-item-content-top">
