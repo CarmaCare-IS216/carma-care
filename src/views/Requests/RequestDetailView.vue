@@ -200,6 +200,7 @@ const handleChatWithUser = async () => {
 </script>
 
 <template>
+  
   <main class="giveaway-detail">
     <section class="giveaway-detail-top">
       <div class="giveaway-main-image">
@@ -237,10 +238,12 @@ const handleChatWithUser = async () => {
           "
           rounded
         />
-        <router-link :to="{ path: `/giveaways/edit/${route.params.id}` }">
+
+        <router-link :to="{ path: `/requests/edit/${route.params.id}` }">
 
           <Button
             v-if="form.posterID == user.currentUser?.id"
+
             class="giveaway-cta-btn"
             icon="pi pi-file-edit"
             label="Edit Listing"

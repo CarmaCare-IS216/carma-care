@@ -7,6 +7,7 @@ import GiveawayDetailView from '@/views/Giveaways/GiveawayDetailView.vue'
 
 import RequestsView from '@/views/Requests/RequestsView.vue'
 import CreateEditRequestView from '@/views/Requests/CreateEditRequestView.vue'
+import RequestDetailView from '@/views/Requests/RequestDetailView.vue'
 
 import ProfileView from '@/views/Profile/ProfileView.vue'
 import CreateEditProfileView from '@/views/Profile/CreateEditProfileView.vue'
@@ -72,8 +73,28 @@ const router = createRouter({
       }
     },
     {
+      path: '/requests/:id',
+      name: 'Request Detail',
+      component: RequestDetailView,
+      meta: {
+        layout: DefaultLayout
+        // requiresAuth: true
+        // requiresProfile: true
+      }
+    },
+    {
       path: '/requests/create',
       name: 'Create Request',
+      component: CreateEditRequestView,
+      meta: {
+        layout: DefaultLayout,
+        requiresAuth: true,
+        requiresProfile: true
+      }
+    },    
+    {
+      path: '/requests/edit/:id',
+      name: 'Edit Request',
       component: CreateEditRequestView,
       meta: {
         layout: DefaultLayout,
