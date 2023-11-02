@@ -1,11 +1,13 @@
 <script setup>
 import Tab from '../../components/Tab/Tab.vue'
 import TabsWrapper from '../../components/Tab/TabsWrapper.vue'
+import ListingsCard from '../../components/listings/ListingsCard.vue'
 import { useMatchMedia, screenSize } from '../../composables/useMatchMedia'
 import Button from 'primevue/Button'
 import Avatar from 'primevue/Avatar'
 import Dialog from 'primevue/dialog'
 import Tag from 'primevue/tag'
+import Chart from 'primevue/chart';
 import { ref, onMounted } from 'vue'
 import { LISTING_TYPE } from '../../util/constants'
 
@@ -18,8 +20,37 @@ import { useUserStore } from '../../stores/user'
 // user info consts from db
 const user = useUserStore()
 const profileInfo = ref({})
+const giveaways = ref()
+const requests = ref()
 const num_giveaways = ref(0)
 const num_requests = ref(0)
+
+// Carma chart
+const chartData = ref();
+const chartOptions = ref();
+const chartMonths = ref();
+const carmaData = ref();
+
+// Reviews
+const reviews = ref();
+
+// Breakpoint for responsiveness
+const tabletScreen = useMatchMedia(screenSize.tablet)
+
+// For modals
+var dietary_restrictions_visible = ref(false);
+var statistics_visible = ref(false);
+
+// Init on Load page
+onMounted(() => {
+  profileInfo.value = user.profile
+  getListings()
+  chartMonths.value = getMonthsArr();
+  carmaData.value = setCarmaData();
+  chartData.value = setChartData();
+  chartOptions.value = setChartOptions();
+  getReviews()
+})
 
 // Fetch user listings from db for giveaway and request count
 async function getListings() {
@@ -33,22 +64,19 @@ async function getListings() {
     console.log('error: ', error)
   } else {
     // filter out the giveaways and requests
-    var giveaways = data.filter((listing) => {
+    var own_giveaways = data.filter((listing) => {
       return listing.listingType === LISTING_TYPE.Giveaway
     })
-    var requests = data.filter((listing) => {
+    var own_requests = data.filter((listing) => {
       return listing.listingType === LISTING_TYPE.Request
     })
-    num_giveaways.value = giveaways.length
-    num_requests.value = requests.length
+
+    giveaways.value = own_giveaways
+    num_giveaways.value = own_giveaways.length
+    requests.value = own_requests
+    num_requests.value = own_requests.length
   }
 }
-
-// Carma chart
-const chartData = ref();
-const chartOptions = ref();
-const chartMonths = ref();
-const carmaData = ref();
 
 let getMonthsArr = () => {
   var dateObj = new Date();
@@ -68,16 +96,16 @@ let getMonthsArr = () => {
     };
   }
 
-  for (var i = 0; i < numOfMonths ; ++i) {
-    dateStrings.unshift(dateObj.toLocaleString('en-US', dateFormatOptions));
+  for (var i = 0; i < numOfMonths; i++) {
     dateObj.setMonth(dateObj.getMonth() - 1);
+    dateStrings.unshift(dateObj.toLocaleString('en-US', dateFormatOptions));
   }
 
   return dateStrings;
 }
 
 const setCarmaData = () => {
-  var history = profileInfo?.value.carmaHistory ? [... profileInfo.value.carmaHistory] : []
+  var history = profileInfo?.value.carmaHistory ? [...profileInfo.value.carmaHistory] : []
   history.push(profileInfo.value.monthlyCarma)
 
   return history;
@@ -120,59 +148,43 @@ const setChartOptions = () => {
   };
 }
 
-// // Reviews
-// const reviews = [
-//   {
-//     revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-//     reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-//     reviewDate: Date.parse('22 Oct 2023 00:00:00 GMT'),
-//     reviewText: 'Great food!'
-//   },
-//   {
-//     revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-//     reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-//     reviewDate: Date.parse('22 Oct 2023 04:00:00 GMT'),
-//     reviewText: 'Great food1!'
-//   },
-//   {
-//     revieweeID: '7abe10bd-1644-4d58-bf03-970f70b67469',
-//     reviewerID: 'a9bc2404-e9f8-4272-97fc-c6027cba5a86',
-//     reviewDate: Date.parse('23 Oct 2023 02:00:00 GMT'),
-//     reviewText: 'Great food2!'
-//   }
-// ];
+// Fetch user reviews from db
+async function getReviews() {
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*')
+    .eq('revieweeID', profileInfo.value.id)
 
-// function custom_sort(a, b) {
-//     return new Date(b.reviewDate).getTime() - new Date(a.reviewDate).getTime();
-// }
+  if (error) {
+    console.log('error: ', error)
+  } else {
+    reviews.value = data
+  }
+  getReviewUserInfo()
+}
 
-// reviews.sort(custom_sort);
+// sorting function for sorting reviews by date
+function custom_sort(a, b) {
+  return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+}
 
-// async function getReviewUserInfo() {
-//   for (const review in reviews) {
-//     const { data, error } = await supabase.from('userProfiles').select('username', 'handle', 'avatarUrl').eq('id', review.reviewerID)
-//   }
-// }
+// retrieve reviewer information and sort
+async function getReviewUserInfo() {
+  for (const review of reviews.value) {
+    const { data, error } = await supabase.from('userProfiles').select('*').eq('id', review.reviewerID)
 
+    if (error) {
+      console.log('error: ', error)
+    } else {
+      review.reviewerUsername = data[0].username
+      review.reviewerHandle = data[0].handle
+      review.reviewerAvatarUrl = data[0].avatarUrl
+    }
+  }
 
-// console.log(reviews)
+  reviews.value.sort(custom_sort)
+}
 
-// Init on Load page
-onMounted(() => {
-  profileInfo.value = user.profile
-  getListings()
-  chartMonths.value = getMonthsArr();
-  carmaData.value = setCarmaData();
-  chartData.value = setChartData();
-  chartOptions.value = setChartOptions();
-})
-
-// Breakpoint for responsiveness
-const tabletScreen = useMatchMedia(screenSize.tablet)
-
-// For modals
-var dietary_restrictions_visible = ref(false);
-var statistics_visible = ref(false);
 let toggleModal = () => {
   if (dietary_restrictions_visible.value) {
     dietary_restrictions_visible.value = !dietary_restrictions_visible.value;
@@ -204,14 +216,12 @@ let toggleModal = () => {
           <Button class="dietary-restrictions" @click="dietary_restrictions_visible = true">Dietary Restrictions</Button>
         </div>
         <div class="profile-statistics">
-          <div
-            style="
+          <div style="
               width: fill-available;
               display: flex;
               align-items: center;
               justify-content: space-between;
-            "
-          >
+            ">
             <div style="display: flex">
               <div class="statistics-icon-wrapper">
                 <div><Button class="icon" icon="pi pi-star" /></div>
@@ -241,16 +251,55 @@ let toggleModal = () => {
     <section class="my-listings">
       <TabsWrapper>
         <Tab icon="pi-gift" title="Giveaways">
-          <div class="container pt-small">Giveaways</div>
+          <div class="container pt-small">
+            <h3 v-if="num_giveaways == 0">No Giveaways Yet</h3>
+            <ListingsCard
+              v-for="item in giveaways"
+              :key="item.listingID"
+              :listingID="item.listingID"
+              :listingType="item.listingType"
+              :username="profileInfo.username"
+              :avatarUrl="profileInfo.avatarUrl"
+              :postingTime="item.postingTime"
+              :locationAddress="item.locationAddress"
+              :category="item.category"
+              :image="item.images[0]"
+              :listingTitle="item.listingTitle"
+              :tags="item.tags"
+              :status="item.status"
+              :quantityNum="item.quantityNum"
+              :isPoster="true"
+            />
+          </div>
         </Tab>
         <Tab icon="pi-megaphone" title="Requests">
-          <div class="container pt-small">Requests</div>
+          <div class="container pt-small">
+            <h3 v-if="num_requests == 0">No Requests Yet</h3>
+            <ListingsCard
+              v-for="item in requests"
+              :key="item.listingID"
+              :listingID="item.listingID"
+              :listingType="item.listingType"
+              :username="profileInfo.username"
+              :avatarUrl="profileInfo.avatarUrl"
+              :postingTime="item.postingTime"
+              :locationAddress="item.locationAddress"
+              :category="item.category"
+              :image="item.images[0]"
+              :listingTitle="item.listingTitle"
+              :tags="item.tags"
+              :status="item.status"
+              :quantityNum="item.quantityNum"
+              :isPoster="true"
+            />
+          </div>
         </Tab>
       </TabsWrapper>
     </section>
   </main>
 
-  <div v-if="dietary_restrictions_visible || statistics_visible" class="profile-view profile-view-modal" @click="toggleModal"></div>
+  <div v-if="dietary_restrictions_visible || statistics_visible" class="profile-view profile-view-modal"
+    @click="toggleModal"></div>
   <Dialog :visible="dietary_restrictions_visible" :draggable="false"
     :header="`${profileInfo.username}'s Dietary Restrictions`" :style="{ width: '50vw' }" class="
     profile-view">
@@ -270,24 +319,42 @@ let toggleModal = () => {
     </div>
   </Dialog>
   <Dialog :visible="statistics_visible" :draggable="false" :header="`${profileInfo.username}'s Activity`"
-    :style="{ width: '50vw' }" class="profile-view">
+    :style="{ width: '50vw', height: '75%' }" class="profile-view">
     <TabsWrapper>
       <Tab icon="pi-hourglass" title="Carma">
         <div class="container pt-small">
-          <!-- <div> -->
-          <h3 style="text-align: center;">All-time Carma:<span style="font-size: 1.2rem; color: var(--color-primary)"><i style="margin: 0 5px;"
-                class="pi pi-hourglass"></i>{{ profileInfo.totalCarma }}</span></h3>
-          <h3 style="text-align: center;">Carma this month:<span style="font-size: 1.2rem; color: var(--color-primary)"><i style="margin: 0 5px;"
+          <h3 style="text-align: center;">All-time Carma:<span style="font-size: 1.2rem; color: var(--color-primary)"><i
+                style="margin: 0 5px;" class="pi pi-hourglass"></i>{{ profileInfo.totalCarma }}</span></h3>
+          <h3 style="text-align: center;">Carma earned this month:<span
+              style="font-size: 1.2rem; color: var(--color-primary)"><i style="margin: 0 5px;"
                 class="pi pi-hourglass"></i>{{ profileInfo.monthlyCarma }}</span></h3>
           <br />
           <div>
-            <Chart type="bar" :data="chartData" :options="chartOptions" :canvasProps="{'display': 'flex'}"/>
+            <Chart type="bar" :data="chartData" :options="chartOptions" :canvasProps="{ 'display': 'flex' }" />
           </div>
         </div>
       </Tab>
       <Tab icon="pi-thumbs-up" title="Reviews">
         <div class="container pt-small">
-          <h3>Reviews</h3>
+          <div class="review-card" v-for="(review, index) in reviews" :key="index">
+            <div class="review-header">
+              <div>
+                <Avatar v-if="review.reviewerAvatarUrl != null" id="avatar" class="mr-2" size="large" shape="circle"
+                  :image="review.reviewerAvatarUrl" />
+                <Avatar v-else id="avatar" class="mr-2" size="large" shape="circle"
+                  :label="review.reviewerUsername?.[0].toUpperCase()" />
+              </div>
+              <div>
+                <div>
+                  <h3>{{ review.reviewerUsername }}</h3>
+                  <p style="color: grey; font-size: 14px">@{{ review.reviewerHandle }}</p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <p>{{ review.reviewText }}</p>
+            </div>
+          </div>
         </div>
       </Tab>
     </TabsWrapper>
@@ -295,7 +362,7 @@ let toggleModal = () => {
 </template>
 
 <style>
-.profile-view  canvas {
+.profile-view canvas {
   display: initial !important;
   width: 100% !important;
   height: 50% !important;
@@ -324,6 +391,19 @@ let toggleModal = () => {
   height: 100%;
 }
 
+.profile-view .review-header {
+  display: flex;
+  margin-bottom: 4px;
+}
+
+.profile-view .review-card {
+  margin-bottom: 30px;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 5px 5px rgba(246, 132, 56, 0.3);
+  border: 1px solid rgba(246, 132, 56, 0.3);
+}
+
 .profile-view .tag {
   background-color: var(--color-primary);
   margin-right: 5px;
@@ -340,7 +420,7 @@ let toggleModal = () => {
   display: flex;
   width: 100%;
   height: 100%;
-  background: whitesmoke;
+  background: rgba(246, 132, 56, 0.03);
   padding: 20px;
   display: flex;
   justify-content: center;
@@ -435,4 +515,5 @@ Overriding PrimeVue's tab component styles
 
 .profile-view .tabview-custom>a {
   width: 170px !important;
-}</style>
+}
+</style>
