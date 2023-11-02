@@ -51,7 +51,6 @@ async function getFiltered(condition) {
       'poster_id,listingID,listingType,allergens, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
     )
     .eq('listingType', 'Giveaway')
-    .order('postingTime', { ascending: true })
 
   query.in('category', categoryFilter)
 
@@ -59,7 +58,10 @@ async function getFiltered(condition) {
     query.eq('dietaryRestrictions', restrictionsFilter)
   }
   query.order('postingTime', { ascending: false })
-  const { data, error } = await query
+  const { data, error } = await query.order('postingTime', { ascending: false })
+
+  query.order('postingTime', { ascending: true })
+  
 
   if (error) {
     console.log('error: ', error)
