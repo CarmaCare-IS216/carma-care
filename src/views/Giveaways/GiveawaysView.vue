@@ -6,8 +6,10 @@ import { supabase } from '@/lib/supabase'
 import { ref, onMounted } from 'vue'
 import ProgressSpinner from 'primevue/progressspinner'
 const queryData = ref([])
+
 const user = useUserStore()
 const currentUser = user.currentUser?.id
+
 const isSearching = ref()
 // grab user id
 

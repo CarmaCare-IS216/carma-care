@@ -17,8 +17,12 @@ import { supabase } from '@/lib/supabase'
 // stores
 import { useUserStore } from '../../stores/user'
 
+
+import { useRoute } from 'vue-router'
+import router from '../../router'
 // user info consts from db
 const user = useUserStore()
+const route = useRoute()
 const profileInfo = ref({})
 const giveaways = ref()
 const requests = ref()
@@ -42,8 +46,10 @@ var dietary_restrictions_visible = ref(false);
 var statistics_visible = ref(false);
 
 // Init on Load page
-onMounted(() => {
-  profileInfo.value = user.profile
+onMounted(async () => {
+  // profileInfo.value = user.profile
+  // console.log(user.profile,"----------")
+  await getPosterInfo()
   getListings()
   chartMonths.value = getMonthsArr();
   carmaData.value = setCarmaData();
@@ -52,6 +58,16 @@ onMounted(() => {
   getReviews()
 })
 
+
+async function getPosterInfo() {
+    const { data, error } = await supabase.from('userProfiles').select('*').eq('handle', route.params.handle.substring(1)).single()
+
+    if (error) {
+      console.log('error: ', error)
+    } else {
+      profileInfo.value=data
+    }
+}
 // Fetch user listings from db for giveaway and request count
 async function getListings() {
   // get all listings from this user
