@@ -196,6 +196,7 @@ const handleChatWithUser = async () => {
         <Flicking
           ref="flickingMainImage"
           :options="{ align: 'prev', circular: false, panelsPerView: 1 }"
+          style="height: 350px;"
         >
           <div v-for="(image, index) in form.images" :key="index">
             <Image :key="index" :src="image" alt="1" preview />
@@ -427,7 +428,7 @@ section.giveaway-detail-top {
 
 .giveaway-main-image {
   width: 400px;
-  height: 400px;
+  height: 350px;
   border-radius: 25px;
   overflow: hidden;
   z-index: 1;
@@ -439,10 +440,16 @@ section.giveaway-detail-top {
 }
 
 .giveaway-main-image img {
-  width: 100%;
-  height: 100%;
-  border-radius: 25px;
+  height: 350px;
+  width: inherit;
+  object-fit: cover;
+
 }
+.giveaway-main-image span{
+  width: inherit;
+}
+
+
 .giveaway-main-image .flicking-arrow-prev,
 .giveaway-main-image .flicking-arrow-next {
   display: none;
@@ -695,4 +702,6 @@ section.giveaway-detail-top .giveaway-cta-btn {
     flex-direction: column;
   }
 }
+
+
 </style>

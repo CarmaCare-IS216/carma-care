@@ -24,6 +24,7 @@ async function getData(queryData) {
       'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
     )
     .eq('listingType', 'Request')
+    .neq("status","Unavailable")
     .order('postingTime', { ascending: false })
 
   // : avatarUrl = item.avatarUrl
@@ -57,11 +58,10 @@ async function getFiltered(condition) {
   if (restrictionsFilter != 'Null') {
     query.eq('dietaryRestrictions', restrictionsFilter)
   }
-  query.order('postingTime', { ascending: false })
-  const { data, error } = await query.order('postingTime', { ascending: false })
-
-  query.order('postingTime', { ascending: true })
   
+  query.neq("status","Unavailable")
+
+  const { data, error } = await query.order('postingTime', { ascending: false })  
 
   if (error) {
     console.log('error: ', error)
@@ -120,6 +120,7 @@ async function search(searchData) {
       )
       .ilike('listingTitle', '%' + searchData + '%')
       .eq('listingType', 'Request')
+      .neq("status","Unavailable")
       .order('postingTime', { ascending: false })
 
     if (error) {
@@ -137,7 +138,7 @@ async function search(searchData) {
 <!-- play with time data -->
 
 <template>
-  <main class="requests">
+  <main class="giveaways">
     <ListingsHeader
       @passQuery="async (query) => (queryData = await getFiltered(query))"
       @passSearch="async (query) => (queryData = await search(query))"

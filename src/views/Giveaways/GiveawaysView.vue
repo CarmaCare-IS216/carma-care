@@ -24,6 +24,7 @@ async function getData(queryData) {
       'poster_id,listingID,listingType, postingTime, locationAddress, category, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl)'
     )
     .eq('listingType', 'Giveaway')
+    .neq("status","Unavailable")
     .order('postingTime', { ascending: false })
 
   // : avatarUrl = item.avatarUrl
@@ -57,11 +58,10 @@ async function getFiltered(condition) {
   if (restrictionsFilter != 'Null') {
     query.eq('dietaryRestrictions', restrictionsFilter)
   }
-  query.order('postingTime', { ascending: false })
-  const { data, error } = await query.order('postingTime', { ascending: false })
-
-  query.order('postingTime', { ascending: true })
   
+  query.neq("status","Unavailable")
+
+  const { data, error } = await query.order('postingTime', { ascending: false })  
 
   if (error) {
     console.log('error: ', error)
@@ -120,6 +120,7 @@ async function search(searchData) {
       )
       .ilike('listingTitle', '%' + searchData + '%')
       .eq('listingType', 'Giveaway')
+      .neq("status","Unavailable")
       .order('postingTime', { ascending: false })
 
     if (error) {
