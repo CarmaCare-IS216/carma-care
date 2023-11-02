@@ -166,8 +166,7 @@ if (days > 1) {
             :key="index"
             severity="warning"
             class="category"
-            :value="item"
-          ></Tag>
+          ><span class="card-content-tags-text">{{ item }}</span></Tag>
         </div>
       </div>
 
@@ -195,6 +194,8 @@ a {
 .listings-card {
   /* max-width: 350px; */
   width: 100%;
+  max-height: 450px;
+  min-height: 450px;
   border-radius: 15px;
   background: #fff;
   box-shadow: 0 7px 30px rgba(0, 0, 0, 0.1);
@@ -338,6 +339,12 @@ a {
   display: flex;
 }
 
+.card-content-tags-text{
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .card-footer {
   display: flex;
   justify-content: space-between;
@@ -347,16 +354,13 @@ a {
   border-bottom-right-radius: 15px;
 }
 
-.category {
-  /* border: solid 1px black;
-  color: grey;
-  background-color: white; */
-}
+
 
 .card-item-servings i {
   padding-right: 6px;
 }
-/* .card-item-servings i::before {
-  color: var(--color-primary);
-} */
+
+
+
+
 </style>

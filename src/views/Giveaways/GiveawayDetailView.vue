@@ -25,9 +25,14 @@ import {
 
 import { useRoute } from 'vue-router'
 import { useUserStore } from '../../stores/user'
+import { useChatStore } from '../../stores/chat'
+import { useToast, POSITION } from 'vue-toastification'
+import router from '../../router'
 
 const route = useRoute()
 const user = useUserStore()
+const chat = useChatStore()
+const toast = useToast()
 
 const bgOverlay = ref('')
 const flickingPlugins = ref([])
@@ -35,11 +40,10 @@ const flickingMainImage = ref()
 const flickingImageCarousel = ref()
 
 const form = ref({
-  posterID: user.currentUser.id,
-  username: user.profile?.username,
-  avatarUrl: user.profile?.avatarUrl,
-  userAllergies: user.profile?.allergies,
-  listingType: LISTING_TYPE.Giveaway, // (LISTING_TYPE.Request for CreateEditRequestView.vue)
+  posterID: '',
+  username: '',
+  userAllergies: '',
+  listingType: '', // (LISTING_TYPE.Request for CreateEditRequestView.vue)
   listingTitle: '',
   status: '',
   category: '',
@@ -125,6 +129,63 @@ const imageCarouselSetup = () => {
     })
   ]
 }
+
+const handleChatWithUser = async () => {
+  console.log('CLICKEDD')
+  // Check if message to user exists
+  const { data: chatMessages, error: chatMessageError } = await supabase
+    .from('chatMessages')
+    .select('*')
+    .match({
+      sender_id: user.profile.id,
+      recipient_id: form.value.posterID
+    })
+
+  if (chatMessageError) {
+    console.log('chatMessageError: ', chatMessageError)
+  } else {
+    console.log('ELSE PART ', chatMessages)
+    if (chatMessages.length === 0) {
+      const { data: posterIdUserData, error: posterIdUserDataError } = await supabase
+        .from('userProfiles')
+        .select('*')
+        .match({
+          id: form.value.posterID
+        })
+
+      if (posterIdUserDataError) {
+        console.log('posterIdUserDataError: ', posterIdUserDataError)
+      } else {
+        chat.selectedContact = posterIdUserData
+
+        console.log('chat.selectedContact ', chat.selectedContact)
+
+        const message = {
+          sender_id: user.currentUser.id,
+          recipient_id: form.value.posterID,
+          listing_id: route.params.id,
+          message: 'Hello, I am interested in your Giveaway!'
+        }
+
+        // Insert into supabase
+        const { error } = await supabase.from('chatMessages').insert(message)
+
+        if (error) {
+          console.log('create profile: ', error)
+          toast.error(error.message, {
+            position: POSITION.TOP_CENTER,
+            timeout: 2000
+          })
+          return
+        }
+
+        console.log('SUCCESS')
+      }
+    }
+
+    router.push({ name: 'Chatroom' })
+  }
+}
 </script>
 
 <template>
@@ -148,6 +209,8 @@ const imageCarouselSetup = () => {
       <div class="giveaway-detail-top-content">
         <h1 class="giveaway-title">{{ form.listingTitle }}</h1>
         <Button
+          v-if="form.posterID !== user.currentUser?.id"
+          @click="handleChatWithUser"
           class="giveaway-cta-btn"
           icon="pi pi-comments"
           label="Chat Now"
@@ -158,6 +221,22 @@ const imageCarouselSetup = () => {
             color: var(--color-primary); */
             background: var(--color-primary);
             color: white;
+            border: solid 1px transparent;
+          "
+          rounded
+        />
+        <Button
+          v-else
+          class="giveaway-cta-btn"
+          icon="pi pi-file-edit"
+          label="Edit Listing"
+          style="
+            padding: 0.75em 2.25em;
+            width: fit-content;
+            /* background: white;
+            color: var(--color-primary); */
+            background: white;
+            color: var(--color-primary);
             border: solid 1px transparent;
           "
           rounded

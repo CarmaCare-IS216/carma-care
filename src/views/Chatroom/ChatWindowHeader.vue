@@ -1,14 +1,13 @@
 <script setup>
-import { defineProps, toRefs, ref } from 'vue'
+import { ref } from 'vue'
 
 import Avatar from 'primevue/Avatar'
 import Button from 'primevue/Button'
 import Menu from 'primevue/Menu'
 
-const props = defineProps({
-  selectedContact: Object
-})
-const { selectedContact } = toRefs(props)
+import { useChatStore } from '../../stores/chat'
+
+const chat = useChatStore()
 
 const userActionsMenu = ref()
 const userActions = ref([
@@ -31,15 +30,23 @@ const userActions = ref([
 const toggleUserActions = (event) => {
   userActionsMenu.value.toggle(event)
 }
+
+console.log('selectedContact >>', chat.selectedContact)
 </script>
 
 <template>
   <div class="chat-window-header">
     <div class="chat-window-header-contact">
-      <Avatar shape="circle" size="large" :image="selectedContact.avatarImage" />
+      <Avatar
+        v-if="chat.selectedContact?.avatarUrl"
+        shape="circle"
+        size="large"
+        :image="chat.selectedContact?.avatarUrl"
+      />
+      <Avatar v-else shape="circle" size="large" :label="chat.selectedContact?.username?.[0]" />
       <!-- <Avatar label="J" shape="circle" size="large" /> -->
       <span class="chat-window-header-contact-name"
-        >{{ selectedContact.displayName }} /
+        >{{ chat.selectedContact?.username }} /
         <router-link to="#" class="text-orange-500">Giveaway Title</router-link></span
       >
     </div>

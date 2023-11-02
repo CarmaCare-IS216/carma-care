@@ -1,17 +1,17 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, provide } from 'vue'
 
 import ChatContactList from './ChatContactList.vue'
 import ChatWindowHeader from './ChatWindowHeader.vue'
 import ChatWindowMessages from './ChatWindowMessages.vue'
 import ChatWindowInputField from './ChatWindowInputField.vue'
 
-const selectedContact = ref({
-  id: '2',
-  displayName: 'John Doe',
-  userType: 1,
-  avatarImage: 'https://avatarfiles.alphacoders.com/342/342016.jpg'
-})
+import { useChatStore } from '../../stores/chat'
+
+const chat = useChatStore()
+
+const chatWindowMessagesRef = ref(null)
+provide('chatWindowMessagesRef', chatWindowMessagesRef)
 </script>
 
 <template>
@@ -19,11 +19,19 @@ const selectedContact = ref({
     <ChatContactList />
 
     <main class="chat-window">
-      <ChatWindowHeader :selectedContact="selectedContact" />
-
-      <ChatWindowMessages :selectedContact="selectedContact" />
-
-      <ChatWindowInputField />
+      <template v-if="chat.selectedContact">
+        <ChatWindowHeader />
+        <ChatWindowMessages />
+        <ChatWindowInputField />
+      </template>
+      <template v-else>
+        <div class="chat-window-placeholder">
+          <div class="chat-window-placeholder-content">
+            <img src="../../assets/images/chatroom_default.svg" alt="Default chat Illustration" />
+            <span>Select a contact to chat with!</span>
+          </div>
+        </div>
+      </template>
     </main>
   </div>
 </template>
@@ -46,6 +54,27 @@ const selectedContact = ref({
   min-height: calc(100vh - var(--nav-height));
   width: calc(100% - var(--sidebar-width));
   overflow-y: auto;
+}
+
+.chat-window-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: inherit;
+}
+
+.chat-window-placeholder-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+.chat-window-placeholder-content img {
+  max-width: 500px;
+  width: 100%;
+}
+.chat-window-placeholder-content span {
+  font-size: 1.2em;
 }
 
 @media screen and (max-width: 768px) {
