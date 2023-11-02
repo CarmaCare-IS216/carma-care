@@ -194,7 +194,6 @@ a {
 .listings-card {
   /* max-width: 350px; */
   width: 100%;
-  max-height: 450px;
   min-height: 450px;
   border-radius: 15px;
   background: #fff;
