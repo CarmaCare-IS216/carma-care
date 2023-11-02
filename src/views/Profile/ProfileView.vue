@@ -253,45 +253,25 @@ let toggleModal = () => {
         <Tab icon="pi-gift" title="Giveaways">
           <div class="container pt-small">
             <h3 v-if="num_giveaways == 0">No Giveaways Yet</h3>
-            <ListingsCard
-              v-for="item in giveaways"
-              :key="item.listingID"
-              :listingID="item.listingID"
-              :listingType="item.listingType"
-              :username="profileInfo.username"
-              :avatarUrl="profileInfo.avatarUrl"
-              :postingTime="item.postingTime"
-              :locationAddress="item.locationAddress"
-              :category="item.category"
-              :image="item.images[0]"
-              :listingTitle="item.listingTitle"
-              :tags="item.tags"
-              :status="item.status"
-              :quantityNum="item.quantityNum"
-              :isPoster="true"
-            />
+            <div class="listings-cards">
+              <ListingsCard v-for="item in giveaways" :key="item.listingID" :listingID="item.listingID"
+                :listingType="item.listingType" :username="profileInfo.username" :avatarUrl="profileInfo.avatarUrl"
+                :postingTime="item.postingTime" :locationAddress="item.locationAddress" :category="item.category"
+                :image="item.images[0]" :listingTitle="item.listingTitle" :tags="item.tags" :status="item.status"
+                :quantityNum="item.quantityNum" :isPoster="true" />
+            </div>
           </div>
         </Tab>
         <Tab icon="pi-megaphone" title="Requests">
           <div class="container pt-small">
             <h3 v-if="num_requests == 0">No Requests Yet</h3>
-            <ListingsCard
-              v-for="item in requests"
-              :key="item.listingID"
-              :listingID="item.listingID"
-              :listingType="item.listingType"
-              :username="profileInfo.username"
-              :avatarUrl="profileInfo.avatarUrl"
-              :postingTime="item.postingTime"
-              :locationAddress="item.locationAddress"
-              :category="item.category"
-              :image="item.images[0]"
-              :listingTitle="item.listingTitle"
-              :tags="item.tags"
-              :status="item.status"
-              :quantityNum="item.quantityNum"
-              :isPoster="true"
-            />
+            <div class="listings-cards">
+              <ListingsCard v-for="item in requests" :key="item.listingID" :listingID="item.listingID"
+                :listingType="item.listingType" :username="profileInfo.username" :avatarUrl="profileInfo.avatarUrl"
+                :postingTime="item.postingTime" :locationAddress="item.locationAddress" :category="item.category"
+                :image="item.images[0]" :listingTitle="item.listingTitle" :tags="item.tags" :status="item.status"
+                :quantityNum="item.quantityNum" :isPoster="true" />
+            </div>
           </div>
         </Tab>
       </TabsWrapper>
