@@ -384,7 +384,7 @@ const handleChatWithUser = async () => {
           <div class="giver-information-content">
             <h3>{{ form.username }}</h3>
 
-            <div class="food-allergens-container">
+            <div v-if="form.userAllergies" class="food-allergens-container">
               <p>Food Allergens</p>
               <div class="tags">
                 <Tag
@@ -398,8 +398,10 @@ const handleChatWithUser = async () => {
             </div>
 
             <Button
+              v-if="form.posterID !== user.currentUser?.id"
               class="giveaway-cta-btn"
               icon="pi pi-comments"
+              @click="handleChatWithUser"
               label="Chat Now"
               style="
                 padding: 0.75em 2.25em;
