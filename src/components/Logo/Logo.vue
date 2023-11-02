@@ -1,7 +1,11 @@
 <template>
   <div class="logo">
     <router-link to="/">
-      <div class="text-orange-500">Logo</div>
+      <div>
+        <img src="src/assets/images/logo.png" alt="" />
+        <span>Carma Care</span>
+      </div>
+      <!-- <div class="text-orange-500">Carma Care</div> -->
     </router-link>
   </div>
 </template>
@@ -15,5 +19,23 @@
 
 .logo a {
   text-decoration: none;
+}
+
+.logo div {
+  display: flex;
+  align-items: center;
+  color: var(--color-primary);
+}
+
+.logo img {
+  width: 65px;
+  height: auto;
+  padding: 10px;
+}
+
+@media screen and (max-width: 768px) {
+  .logo span {
+    display: none;
+  }
 }
 </style>
