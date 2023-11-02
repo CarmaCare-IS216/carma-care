@@ -252,7 +252,7 @@ let toggleModal = () => {
       <TabsWrapper>
         <Tab icon="pi-gift" title="Giveaways">
           <div class="container pt-small">
-            <h3 v-if="giveaways.length == 0">No Giveaways Yet</h3>
+            <h3 v-if="num_giveaways == 0">No Giveaways Yet</h3>
             <ListingsCard
               v-for="item in giveaways"
               :key="item.listingID"
@@ -274,7 +274,7 @@ let toggleModal = () => {
         </Tab>
         <Tab icon="pi-megaphone" title="Requests">
           <div class="container pt-small">
-            <h3 v-if="requests.length == 0">No Requests Yet</h3>
+            <h3 v-if="num_requests == 0">No Requests Yet</h3>
             <ListingsCard
               v-for="item in requests"
               :key="item.listingID"
