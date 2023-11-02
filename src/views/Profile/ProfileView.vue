@@ -252,7 +252,15 @@ let toggleModal = () => {
       <TabsWrapper>
         <Tab icon="pi-gift" title="Giveaways">
           <div class="container pt-small">
-            <h3 v-if="num_giveaways == 0">No Giveaways Yet</h3>
+            <!-- <h3 v-if="num_giveaways == 0">No Giveaways Yet</h3> -->
+            <div v-if="num_giveaways == 0" class="empty-view">
+              <span>You have yet to post any Giveaways!
+                <router-link :to="{ path: '/giveaways/create' }">
+                  <a>Make one now!</a>
+                </router-link>
+              </span>
+              <img src="../../assets/images/no_listings_bg.svg" alt="No Listings Default View" class="empty-view-img"/>
+            </div>
             <div class="listings-cards">
               <ListingsCard v-for="item in giveaways" :key="item.listingID" :listingID="item.listingID"
                 :listingType="item.listingType" :username="profileInfo.username" :avatarUrl="profileInfo.avatarUrl"
@@ -264,7 +272,14 @@ let toggleModal = () => {
         </Tab>
         <Tab icon="pi-megaphone" title="Requests">
           <div class="container pt-small">
-            <h3 v-if="num_requests == 0">No Requests Yet</h3>
+            <div v-if="num_requests == 0" class="empty-view">
+              <span>You have yet to make any Requests!
+                <router-link :to="{ path: '/requests/create' }">
+                  <a>Make one now!</a>
+                </router-link>
+              </span>
+              <img src="../../assets/images/no_listings_bg.svg" alt="No Listings Default View" class="empty-view-img"/>
+            </div>
             <div class="listings-cards">
               <ListingsCard v-for="item in requests" :key="item.listingID" :listingID="item.listingID"
                 :listingType="item.listingType" :username="profileInfo.username" :avatarUrl="profileInfo.avatarUrl"
@@ -342,6 +357,19 @@ let toggleModal = () => {
 </template>
 
 <style>
+.profile-view .empty-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+}
+
+.profile-view .empty-view-img {
+  width: 50%;
+  max-width: 400px;
+}
+
 .profile-view canvas {
   display: initial !important;
   width: 100% !important;
