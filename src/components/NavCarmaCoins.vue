@@ -1,20 +1,18 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useUserStore } from '../stores/user'
-const user = useUserStore()
-const userCarma = ref()
+import { defineProps, toRefs } from 'vue'
 
-onMounted( async () => {
-  user.profile = await user.fetchUserProfile()
-  userCarma.value = user.profile.currBalanceCarma
+const props = defineProps({
+  userCarma: String
 })
+
+const { userCarma } = toRefs(props)
 
 </script>
 
 <template>
   <div class="nav-btns-carma-coins">
     <i class="pi pi-hourglass"></i>
-    <span>{{ userCarma? userCarma : 0 }}</span>
+    <span>{{ userCarma? parseInt(userCarma) : 0 }}</span>
   </div>
 </template>
 
