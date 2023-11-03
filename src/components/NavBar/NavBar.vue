@@ -45,7 +45,7 @@ const route = useRoute()
           />
         </template>
         <template v-else>
-          <NavCarmaCoins />
+          <NavCarmaCoins :userCarma="String(user.profile ? user.profile.currBalanceCarma : 0)"/>
           <AvatarMenu />
           <NotificationButton />
         </template>

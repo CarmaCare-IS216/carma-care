@@ -1,11 +1,20 @@
+<script setup>
+import { defineProps, toRefs } from 'vue'
+
+const props = defineProps({
+  userCarma: String
+})
+
+const { userCarma } = toRefs(props)
+
+</script>
+
 <template>
   <div class="nav-btns-carma-coins">
     <i class="pi pi-hourglass"></i>
-    <span>100</span>
+    <span>{{ userCarma? parseInt(userCarma) : 0 }}</span>
   </div>
 </template>
-
-<script setup></script>
 
 <style scoped>
 .nav-btns-carma-coins {
