@@ -5,14 +5,17 @@ import Avatar from 'primevue/Avatar'
 
 import { renderAMPMTime } from '../../util/helper'
 
+import { useRoute } from 'vue-router'
 import { useChatStore } from '../../stores/chat'
 import { useUserStore } from '../../stores/user'
 import { supabase } from '../../lib/supabase'
 
 const chatWindowMessagesRef = inject('chatWindowMessagesRef')
 
+const route = useRoute()
 const user = useUserStore()
 const chat = useChatStore()
+let notificationSound = null
 
 const getSenderMessageAvatar = (senderId) => {
   console.log('senderId ', senderId)
@@ -26,6 +29,7 @@ const getSenderMessageAvatar = (senderId) => {
 }
 
 onMounted(() => {
+  notificationSound = new Audio('src/assets/audio/notification.mp3')
   watchEffect(() => {
     if (chat.selectedContact) {
       console.log('Getting message')
@@ -86,6 +90,46 @@ const getMessages = async () => {
             message: payload.new.message,
             timestamp: payload.new.timestamp
           })
+
+          // chat.contactList = chat.contactList.filter(
+          //   (contact) => contact.chat_id !== payload.new.chat_id
+          // )
+
+          // console.log('new chat.contactList: ', chat.contactList)
+
+          if (route.name !== 'Chatroom') {
+            console.log('route.name ', route.name)
+            notificationSound.play()
+            chat.notificationCount++
+          }
+
+          const recipientContactId = chat.contactList
+            .filter((contact) => contact.chat_id === payload.new.chat_id)
+            .pop()?.id
+
+          const recipientContact = chat.contactList.find(
+            (contact) => recipientContactId === contact.id
+          )
+          const updatedChatContactListItem = {
+            id: payload.new.id,
+            chat_id: payload.new.chat_id,
+            avatarUrl: recipientContact?.avatarUrl || '',
+            username: recipientContact?.username,
+            // lastMessage: uniqueChatRecord[0].message,
+            lastMessage: payload.new.message,
+            lastMessageTime: renderAMPMTime(payload.new.timestamp),
+            lastMessageCount: chat.notificationCount
+          }
+
+          const filterOldChatList = chat.contactList.filter(
+            (contact) => contact.chat_id !== payload.new.chat_id
+          )
+
+          // Combine the filtered list with the updated contact item
+          const newContactList = [updatedChatContactListItem, ...filterOldChatList]
+          chat.setContactList(newContactList)
+
+          console.log('newContactList ', chat.contactList)
         }
       )
       .subscribe()
