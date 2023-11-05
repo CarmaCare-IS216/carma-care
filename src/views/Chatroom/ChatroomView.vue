@@ -12,6 +12,8 @@ const chat = useChatStore()
 
 const chatWindowMessagesRef = ref(null)
 provide('chatWindowMessagesRef', chatWindowMessagesRef)
+
+console.log('selectedContact here ', chat.selectedContact)
 </script>
 
 <template>
@@ -19,7 +21,7 @@ provide('chatWindowMessagesRef', chatWindowMessagesRef)
     <ChatContactList />
 
     <main class="chat-window">
-      <template v-if="chat.selectedContact">
+      <template v-if="chat.selectedContact.chat_id !== undefined">
         <ChatWindowHeader />
         <ChatWindowMessages />
         <ChatWindowInputField />

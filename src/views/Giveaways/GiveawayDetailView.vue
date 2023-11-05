@@ -152,14 +152,11 @@ const handleChatWithUser = async () => {
         .match({
           id: form.value.posterID
         })
+        .single()
 
       if (posterIdUserDataError) {
         console.log('posterIdUserDataError: ', posterIdUserDataError)
       } else {
-        chat.selectedContact = posterIdUserData
-
-        console.log('chat.selectedContact ', chat.selectedContact)
-
         const message = {
           sender_id: user.currentUser.id,
           recipient_id: form.value.posterID,
@@ -178,6 +175,19 @@ const handleChatWithUser = async () => {
           })
           return
         }
+
+        const posterIdUserContactObj = {
+          id: posterIdUserData?.id,
+          avatarUrl: posterIdUserData?.avatarUrl,
+          username: posterIdUserData?.username,
+          lastMessage: 'Hello, I am interested in your Giveaway!',
+          lastMessageTime: '',
+          lastMessageCount: 1
+        }
+        chat.selectedContact = posterIdUserContactObj
+
+        console.log('posterIdUserData ', posterIdUserData)
+        console.log('chat.selectedContact ', chat.selectedContact)
 
         console.log('SUCCESS')
       }

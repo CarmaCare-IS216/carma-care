@@ -17,6 +17,8 @@ const user = useUserStore()
 const chat = useChatStore()
 let notificationSound = null
 
+console.log('chat selectedContact ', chat.selectedContact)
+
 const getSenderMessageAvatar = (senderId) => {
   console.log('senderId ', senderId)
   if (senderId === chat.selectedContact.id) {
