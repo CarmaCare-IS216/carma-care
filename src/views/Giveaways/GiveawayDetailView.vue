@@ -359,7 +359,7 @@ const handleChatWithUser = async () => {
             }}</span>
           </div>
           <div class="giveaway-item giveaway-estimated-time">
-            <span class="giveaway-item-label">Estimated Arrival Time</span>
+            <!-- <span class="giveaway-item-label">Estimated Arrival Time</span>
             <span class="giveaway-item-value">
               <div class="giveaway-item-time-container">
                 <div class="giveaway-item-time">
@@ -376,7 +376,7 @@ const handleChatWithUser = async () => {
                 </div>
               </div>
               <div class="giveaway-item-time-distance">14km away from your location</div>
-            </span>
+            </span> -->
             <!-- <div class="map">Embed Google Maps API</div> -->
             <Map :locationCoords="form.locationCoords" />
           </div>
@@ -408,7 +408,10 @@ const handleChatWithUser = async () => {
 
           <!-- <Avatar label="P" shape="circle" style="height: 180px; width: 180px" /> -->
           <div class="giver-information-content">
-            <router-link :to="{ path: `/profile/@${form.handle}` }">
+            <router-link
+              :to="{ path: `/profile/@${form.handle}` }"
+              style="color: var(--color-primary)"
+            >
               <h3>{{ form.username }}</h3>
             </router-link>
 
