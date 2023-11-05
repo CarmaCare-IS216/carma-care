@@ -17,8 +17,12 @@ import { supabase } from '@/lib/supabase'
 // stores
 import { useUserStore } from '../../stores/user'
 
+
+import { useRoute } from 'vue-router'
+import router from '../../router'
 // user info consts from db
 const user = useUserStore()
+const route = useRoute()
 const profileInfo = ref({})
 const giveaways = ref()
 const requests = ref()
@@ -42,8 +46,10 @@ var dietary_restrictions_visible = ref(false);
 var statistics_visible = ref(false);
 
 // Init on Load page
-onMounted(() => {
-  profileInfo.value = user.profile
+onMounted(async () => {
+  // profileInfo.value = user.profile
+  // console.log(user.profile,"----------")
+  await getPosterInfo()
   getListings()
   chartMonths.value = getMonthsArr();
   carmaData.value = setCarmaData();
@@ -52,6 +58,16 @@ onMounted(() => {
   getReviews()
 })
 
+
+async function getPosterInfo() {
+    const { data, error } = await supabase.from('userProfiles').select('*').eq('handle', route.params.handle.substring(1)).single()
+
+    if (error) {
+      console.log('error: ', error)
+    } else {
+      profileInfo.value=data
+    }
+}
 // Fetch user listings from db for giveaway and request count
 async function getListings() {
   // get all listings from this user
@@ -252,7 +268,15 @@ let toggleModal = () => {
       <TabsWrapper>
         <Tab icon="pi-gift" title="Giveaways">
           <div class="container pt-small">
-            <h3 v-if="num_giveaways == 0">No Giveaways Yet</h3>
+            <!-- <h3 v-if="num_giveaways == 0">No Giveaways Yet</h3> -->
+            <div v-if="num_giveaways == 0" class="empty-view">
+              <span>You have yet to post any Giveaways!
+                <router-link :to="{ path: '/giveaways/create' }">
+                  <a>Make one now!</a>
+                </router-link>
+              </span>
+              <img src="../../assets/images/no_listings_bg.svg" alt="No Listings Default View" class="empty-view-img"/>
+            </div>
             <div class="listings-cards">
               <ListingsCard v-for="item in giveaways" :key="item.listingID" :listingID="item.listingID"
                 :listingType="item.listingType" :username="profileInfo.username" :avatarUrl="profileInfo.avatarUrl"
@@ -264,7 +288,14 @@ let toggleModal = () => {
         </Tab>
         <Tab icon="pi-megaphone" title="Requests">
           <div class="container pt-small">
-            <h3 v-if="num_requests == 0">No Requests Yet</h3>
+            <div v-if="num_requests == 0" class="empty-view">
+              <span>You have yet to make any Requests!
+                <router-link :to="{ path: '/requests/create' }">
+                  <a>Make one now!</a>
+                </router-link>
+              </span>
+              <img src="../../assets/images/no_listings_bg.svg" alt="No Listings Default View" class="empty-view-img"/>
+            </div>
             <div class="listings-cards">
               <ListingsCard v-for="item in requests" :key="item.listingID" :listingID="item.listingID"
                 :listingType="item.listingType" :username="profileInfo.username" :avatarUrl="profileInfo.avatarUrl"
@@ -342,6 +373,19 @@ let toggleModal = () => {
 </template>
 
 <style>
+.profile-view .empty-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+}
+
+.profile-view .empty-view-img {
+  width: 50%;
+  max-width: 400px;
+}
+
 .profile-view canvas {
   display: initial !important;
   width: 100% !important;

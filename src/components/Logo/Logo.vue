@@ -2,7 +2,7 @@
   <div class="logo">
     <router-link to="/">
       <div>
-        <img src="src/assets/images/logo.png" alt="" />
+        <img :src="Logo" alt="" />
         <span>Carma Care</span>
       </div>
       <!-- <div class="text-orange-500">Carma Care</div> -->
@@ -10,7 +10,9 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import Logo from '@/assets/images/logo.png'
+</script>
 
 <style scoped>
 .logo {

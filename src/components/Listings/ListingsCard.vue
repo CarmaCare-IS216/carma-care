@@ -55,7 +55,7 @@ if (days > 1) {
 </script>
 
 <template>
-  <router-link :to="{ path: `/giveaways/${listingID}` }">
+  <router-link :to="{ path: `/${listingType.toLowerCase()}s/${listingID}` }">
     <div class="listings-card">
       <div class="card-header">
         <div class="card-header-avatar">
@@ -86,7 +86,7 @@ if (days > 1) {
             </span>
             <div v-if="isPoster" class="card-header-edit-btn">
               <!-- card header edit button goes in here -->
-              <router-link :to="{ path: `/giveaways/edit/${listingID}` }">
+              <router-link :to="{ path: `/${listingType.toLowerCase()}s/edit/${listingID}` }">
                 <i class="pi pi-file-edit" style="font-size: larger; margin-right: 2px"></i>
               </router-link>
             </div>
@@ -194,7 +194,6 @@ a {
 .listings-card {
   /* max-width: 350px; */
   width: 100%;
-  max-height: 450px;
   min-height: 450px;
   border-radius: 15px;
   background: #fff;

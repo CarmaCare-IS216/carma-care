@@ -70,6 +70,12 @@ input {
   width: inherit;
 }
 
+/* .preview-dialog .p-overflow-hidden {
+  overflow: auto !important;
+  scrollbar-gutter: stable both-edges !important;
+  --scrollbar-width: 0 !important;
+} */
+
 @media screen and (max-width: 768px) {
   main {
     padding-top: 75px;
