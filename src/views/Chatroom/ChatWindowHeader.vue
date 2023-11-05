@@ -37,6 +37,15 @@ console.log('selectedContact >>', chat.selectedContact)
 <template>
   <div class="chat-window-header">
     <div class="chat-window-header-contact">
+      <Button
+        icon="pi pi-arrow-left"
+        severity="warning"
+        text
+        rounded
+        aria-label="User Actions"
+        class="chat-back-btn"
+        @click="chat.selectedContact = null"
+      />
       <Avatar
         v-if="chat.selectedContact?.avatarUrl"
         shape="circle"
@@ -100,9 +109,17 @@ console.log('selectedContact >>', chat.selectedContact)
   gap: 10px;
 }
 
+.chat-back-btn {
+  display: none;
+}
+
 @media screen and (max-width: 768px) {
   .chat-window-header {
     width: 100%;
+  }
+
+  .chat-back-btn {
+    display: block;
   }
 }
 </style>
