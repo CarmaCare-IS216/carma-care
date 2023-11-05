@@ -13,8 +13,8 @@ import { useMatchMedia, screenSize } from '../composables/useMatchMedia'
 // primevue
 import Avatar from 'primevue/Avatar'
 import Menu from 'primevue/Menu'
-import Dialog from 'primevue/dialog';
-import Button from 'primevue/Button';
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/Button'
 
 // vue-toastification
 import { useToast, POSITION } from 'vue-toastification'
@@ -27,7 +27,7 @@ import { useUserStore } from '../stores/user'
 
 const toast = useToast()
 const user = useUserStore()
-const modalVisible = ref(false);
+const modalVisible = ref(false)
 
 const menu = ref()
 const items = ref([
@@ -35,7 +35,7 @@ const items = ref([
     label: 'My Profile',
     icon: 'pi pi-user',
     command: () => {
-      router.push({ path: '/profile/@peter-parker' })
+      router.push({ path: `/profile/@${user.profile.handle}` })
     }
   },
   {
@@ -86,7 +86,11 @@ const handleLogout = async () => {
 const donateCarma = async () => {
   const { data, error } = await supabase
     .from('userProfiles')
-    .update({ totalDonatedCarma: user.profile.totalDonatedCarma + user.profile.expiringCarma, expiringCarma: 0, currBalanceCarma: user.profile.currBalanceCarma -  user.profile.expiringCarma})
+    .update({
+      totalDonatedCarma: user.profile.totalDonatedCarma + user.profile.expiringCarma,
+      expiringCarma: 0,
+      currBalanceCarma: user.profile.currBalanceCarma - user.profile.expiringCarma
+    })
     .match({ id: user.profile.id })
 
   if (error) {
@@ -114,8 +118,12 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
         <Avatar :image="user.profile?.avatarUrl" size="medium" shape="circle" />
       </template>
       <template v-else-if="user.profile !== null">
-        <Avatar :label="user.profile?.username.charAt(0).toUpperCase()" size="medium" shape="circle"
-          style="background-color: #4caf4f; color: #fff" />
+        <Avatar
+          :label="user.profile?.username.charAt(0).toUpperCase()"
+          size="medium"
+          shape="circle"
+          style="background-color: #4caf4f; color: #fff"
+        />
       </template>
       <template v-else>
         <Avatar icon="pi pi-user" size="medium" shape="circle" />
@@ -128,8 +136,9 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
     <Menu ref="menu" :model="items" :popup="true">
       <template #start>
         <button
-          class="w-full p-link flex flex-column justify-content-center p-2 pl-4 text-color hover:surface-200 border-noround">
-          <NavCarmaCoins :userCarma="String(user.profile ? user.profile.currBalanceCarma : 0)"/>
+          class="w-full p-link flex flex-column justify-content-center p-2 pl-4 text-color hover:surface-200 border-noround"
+        >
+          <NavCarmaCoins :userCarma="String(user.profile ? user.profile.currBalanceCarma : 0)" />
           <div class="donate-text" @click="modalVisible = true">Donate Carma</div>
         </button>
         <div style="border-bottom: solid 1px #e2e2e2"></div>
@@ -143,32 +152,50 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
       </template>
       <template #end>
         <div style="border-top: solid 1px #e2e2e2"></div>
-        <button @click="handleLogout"
-          class="w-full p-link flex align-items-center p-2 pl-4 text-color hover:surface-200 border-noround">
+        <button
+          @click="handleLogout"
+          class="w-full p-link flex align-items-center p-2 pl-4 text-color hover:surface-200 border-noround"
+        >
           <i class="pi pi-sign-out text-red-500" />
           <span class="ml-2 text-red-500">Log Out</span>
         </button>
       </template>
     </Menu>
   </div>
-  <Dialog class="preview-dialog" v-model:visible="modalVisible" modal header="Header" :style="{ width: '50rem' }"
-    :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+  <Dialog
+    class="preview-dialog"
+    v-model:visible="modalVisible"
+    modal
+    header="Header"
+    :style="{ width: '50rem' }"
+    :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
+  >
     <template #header>
-        <h3>Donating CarmaCoins</h3>
+      <h3>Donating CarmaCoins</h3>
     </template>
     <p class="m-0">
-      CarmaCoins earned have an expiration period of 1 month, and will be subtracted from your CarmaCoins at the end of every month.<br><br>This feature allows you to donate all of your expiring CarmaCoins to other users in need that have been identified by our platform.<br><br>You currently have <span class="donate-text">{{ user.profile?.expiringCarma }}</span> expiring CarmaCoins. Would you like to donate them now?
+      CarmaCoins earned have an expiration period of 1 month, and will be subtracted from your
+      CarmaCoins at the end of every month.<br /><br />This feature allows you to donate all of your
+      expiring CarmaCoins to other users in need that have been identified by our platform.<br /><br />You
+      currently have <span class="donate-text">{{ user.profile?.expiringCarma }}</span> expiring
+      CarmaCoins. Would you like to donate them now?
     </p>
     <template #footer>
       <Button label="Back" severity="secondary" icon="pi pi-times" @click="modalVisible = false" />
-      <Button label="Donate Now!" severity="warning" icon="pi pi-gift" @click="donateCarma" autofocus />
+      <Button
+        label="Donate Now!"
+        severity="warning"
+        icon="pi pi-gift"
+        @click="donateCarma"
+        autofocus
+      />
     </template>
   </Dialog>
 </template>
 
 <style scoped>
 .donate-text {
-  color: var(--color-primary)
+  color: var(--color-primary);
 }
 
 .donate-text:hover {
