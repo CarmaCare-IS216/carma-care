@@ -43,6 +43,7 @@ const flickingImageCarousel = ref()
 const form = ref({
   posterID: '',
   username: '',
+  handle: '',
   userAllergies: '',
   listingType: '', // (LISTING_TYPE.Request for CreateEditRequestView.vue)
   listingTitle: '',
@@ -72,7 +73,7 @@ const getGiveawayDetailData = async () => {
   const { data, error } = await supabase
     .from('listings')
     .select(
-      'poster_id,listingID,listingType, listingDesc, postingTime, locationAddress, locationDesc, locationCoords, category, dietaryRestrictions, allergens, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl, allergies)'
+      'poster_id,listingID,listingType, listingDesc, postingTime, locationAddress, locationDesc, locationCoords, category, dietaryRestrictions, allergens, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl, handle, allergies)'
     )
     .match({ listingID: route.params.id })
     .single()
@@ -88,6 +89,7 @@ const getGiveawayDetailData = async () => {
     form.value = {
       posterID: data.poster_id,
       username: data.userProfiles.username,
+      handle: data.userProfiles.handle,
       avatarUrl: data.userProfiles.avatarUrl,
       userAllergies: data.userProfiles.allergies,
       listingType: data.listingType, // (LISTING_TYPE.Request for CreateEditRequestView.vue)
@@ -161,14 +163,11 @@ const handleChatWithUser = async () => {
 
         console.log('chat.selectedContact ', chat.selectedContact)
 
-        var chat_message=''
-        if(form.value.listingType=="Giveaway"){
-          chat_message='Hello, I am interested in your Giveaway!'
-
-        }
-        else{
-          chat_message='Hello, I am interested in your Request!'
-          
+        var chat_message = ''
+        if (form.value.listingType == 'Giveaway') {
+          chat_message = 'Hello, I am interested in your Giveaway!'
+        } else {
+          chat_message = 'Hello, I am interested in your Request!'
         }
 
         const message = {
@@ -200,7 +199,6 @@ const handleChatWithUser = async () => {
 </script>
 
 <template>
-  
   <main class="giveaway-detail">
     <section class="giveaway-detail-top">
       <div class="giveaway-main-image">
@@ -208,7 +206,7 @@ const handleChatWithUser = async () => {
         <Flicking
           ref="flickingMainImage"
           :options="{ align: 'prev', circular: false, panelsPerView: 1 }"
-          style="height: 350px;"
+          style="height: 350px"
         >
           <div v-for="(image, index) in form.images" :key="index">
             <Image :key="index" :src="image" alt="1" preview />
@@ -240,10 +238,8 @@ const handleChatWithUser = async () => {
         />
 
         <router-link :to="{ path: `/requests/edit/${route.params.id}` }">
-
           <Button
             v-if="form.posterID == user.currentUser?.id"
-
             class="giveaway-cta-btn"
             icon="pi pi-file-edit"
             label="Edit Listing"
@@ -289,10 +285,9 @@ const handleChatWithUser = async () => {
       <div class="bg-overlay" :style="{ '--bg-image': `url(${bgOverlay})` }"></div>
     </section>
     <section class="giveaway-detail-bottom">
-      <CardContainer class="giveaway-detail-bottom-card" :title="form.listingType +' Information'">
+      <CardContainer class="giveaway-detail-bottom-card" :title="form.listingType + ' Information'">
         <div class="giveaway-information">
           <div class="giveaway-item giveaway-title">
-            
             <span class="giveaway-item-label">{{ form.listingType }} Title</span>
             <span class="giveaway-item-value">{{ form.listingTitle }}</span>
           </div>
@@ -377,12 +372,34 @@ const handleChatWithUser = async () => {
         <h2 v-if="form.listingType == 'Giveaway'">Giver Information</h2>
         <h2 v-else>Requester Information</h2>
         <div class="giver-information">
-          <Avatar v-if="form.avatarUrl!= null" :image="form.avatarUrl" shape="circle" style="height: 180px; width: 180px" />
-          <Avatar v-else :label="form.username?.[0]?.toUpperCase()" shape="circle" size="xlarge" style="height: 180px; width: 180px;background-color: rgb(76, 175, 79);color: white;font-size: 50px;" />
-         
+          <Avatar
+            v-if="form.avatarUrl != null"
+            :image="form.avatarUrl"
+            shape="circle"
+            style="height: 180px; width: 180px"
+          />
+          <Avatar
+            v-else
+            :label="form.username?.[0]?.toUpperCase()"
+            shape="circle"
+            size="xlarge"
+            style="
+              height: 180px;
+              width: 180px;
+              background-color: rgb(76, 175, 79);
+              color: white;
+              font-size: 50px;
+            "
+          />
+
           <!-- <Avatar label="P" shape="circle" style="height: 180px; width: 180px" /> -->
           <div class="giver-information-content">
-            <h3>{{ form.username }}</h3>
+            <router-link
+              :to="{ path: `/profile/@${form.handle}` }"
+              style="color: var(--color-primary)"
+            >
+              <h3>{{ form.username }}</h3>
+            </router-link>
 
             <div v-if="form.userAllergies" class="food-allergens-container">
               <p>Food Allergens</p>
@@ -466,12 +483,10 @@ section.giveaway-detail-top {
   height: 350px;
   width: inherit;
   object-fit: cover;
-
 }
-.giveaway-main-image span{
+.giveaway-main-image span {
   width: inherit;
 }
-
 
 .giveaway-main-image .flicking-arrow-prev,
 .giveaway-main-image .flicking-arrow-next {
@@ -725,6 +740,4 @@ section.giveaway-detail-top .giveaway-cta-btn {
     flex-direction: column;
   }
 }
-
-
 </style>

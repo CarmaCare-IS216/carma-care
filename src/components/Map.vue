@@ -93,6 +93,6 @@ watch([mapDiv, currPos], () => {
   border-radius: 25px;
   display: grid;
   place-items: center;
-  margin-top: 20px;
+  /* margin-top: 20px; */
 }
 </style>
