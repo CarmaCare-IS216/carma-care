@@ -24,6 +24,9 @@ import { useUserStore } from '../stores/user'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior() {
+    document.getElementById('app').scrollIntoView({ behavior: 'smooth' })
+  },
   routes: [
     {
       path: '/',
@@ -91,7 +94,7 @@ const router = createRouter({
         requiresAuth: true,
         requiresProfile: true
       }
-    },    
+    },
     {
       path: '/requests/edit/:id',
       name: 'Edit Request',
