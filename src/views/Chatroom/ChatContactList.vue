@@ -103,12 +103,13 @@ const getUsersFromChat = async () => {
 
 const setSelectedContact = (id) => {
   chat.selectedContact = chat.contactList.find((contact) => contact?.id === id)
+
   console.log('selected contact: ', chat.selectedContact)
 }
 </script>
 
 <template>
-  <aside class="chat-sidebar">
+  <aside class="chat-sidebar" :class="{ 'selected-contact': chat.selectedContact !== null }">
     <div class="chat-list-search">
       <InputText
         v-model="searchContactInput"
@@ -139,6 +140,7 @@ const setSelectedContact = (id) => {
   width: var(--sidebar-width);
   height: calc(100vh - calc(--nav-height));
   background: #efefef;
+  z-index: 2;
 }
 
 .chat-list-search {
@@ -163,7 +165,12 @@ const setSelectedContact = (id) => {
 
 @media screen and (max-width: 768px) {
   .chat-sidebar {
-    display: none;
+    width: 100%;
+    transform: translateX(0);
+    transition: all 0.3s;
+  }
+  .chat-sidebar.selected-contact {
+    transform: translateX(-100%);
   }
 }
 </style>

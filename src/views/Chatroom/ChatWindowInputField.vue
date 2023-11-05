@@ -19,13 +19,8 @@ const toast = useToast()
 const messageTextInput = ref('')
 
 const handleSendMessage = async () => {
-  // // Insert into UI
-  // chat.sendMessage({
-  //   recipientId: chat.selectedContact?.id,
-  //   senderId: user.currentUser.id,
-  //   message: messageTextInput.value
-  // })
-
+  if (messageTextInput.value === '') return
+  
   chat.selectedContact.lastMessage = messageTextInput.value
 
   nextTick(() => {

@@ -3,8 +3,11 @@ import NavBar from '@/components/NavBar/NavBar.vue'
 import NavBarMobileHeader from '../components/NavBarMobile/NavBarMobileHeader.vue'
 import NavBarMobileMenu from '../components/NavBarMobile/NavBarMobileMenu.vue'
 import { useMatchMedia, screenSize } from '@/composables/useMatchMedia'
+import { useChatStore } from '../stores/chat'
 
 const tabletScreen = useMatchMedia(screenSize.tablet)
+
+const chat = useChatStore()
 </script>
 
 <template>
@@ -13,7 +16,9 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
       <template v-if="tabletScreen">
         <NavBarMobileHeader />
         <template v-if="$route.name !== 'Create Giveaway' && $route.name !== 'Create Request'">
-          <NavBarMobileMenu />
+          <template v-if="chat.selectedContact === null">
+            <NavBarMobileMenu />
+          </template>
         </template>
       </template>
       <template v-else>
