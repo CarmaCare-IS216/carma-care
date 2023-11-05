@@ -21,7 +21,7 @@ console.log('selectedContact here ', chat.selectedContact)
     <ChatContactList />
 
     <main class="chat-window">
-      <template v-if="chat.selectedContact.chat_id !== undefined">
+      <template v-if="chat.selectedContact?.chat_id !== undefined">
         <ChatWindowHeader />
         <ChatWindowMessages />
         <ChatWindowInputField />
