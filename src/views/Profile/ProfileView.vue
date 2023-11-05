@@ -7,7 +7,7 @@ import Button from 'primevue/Button'
 import Avatar from 'primevue/Avatar'
 import Dialog from 'primevue/dialog'
 import Tag from 'primevue/tag'
-import Chart from 'primevue/chart';
+import Chart from 'primevue/chart'
 import { ref, onMounted } from 'vue'
 import { LISTING_TYPE } from '../../util/constants'
 
@@ -16,7 +16,6 @@ import { supabase } from '@/lib/supabase'
 
 // stores
 import { useUserStore } from '../../stores/user'
-
 
 import { useRoute } from 'vue-router'
 import router from '../../router'
@@ -30,20 +29,20 @@ const num_giveaways = ref(0)
 const num_requests = ref(0)
 
 // Carma chart
-const chartData = ref();
-const chartOptions = ref();
-const chartMonths = ref();
-const carmaData = ref();
+const chartData = ref()
+const chartOptions = ref()
+const chartMonths = ref()
+const carmaData = ref()
 
 // Reviews
-const reviews = ref();
+const reviews = ref()
 
 // Breakpoint for responsiveness
 const tabletScreen = useMatchMedia(screenSize.tablet)
 
 // For modals
-var dietary_restrictions_visible = ref(false);
-var statistics_visible = ref(false);
+var dietary_restrictions_visible = ref(false)
+var statistics_visible = ref(false)
 
 // Init on Load page
 onMounted(async () => {
@@ -51,22 +50,25 @@ onMounted(async () => {
   // console.log(user.profile,"----------")
   await getPosterInfo()
   getListings()
-  chartMonths.value = getMonthsArr();
-  carmaData.value = setCarmaData();
-  chartData.value = setChartData();
-  chartOptions.value = setChartOptions();
+  chartMonths.value = getMonthsArr()
+  carmaData.value = setCarmaData()
+  chartData.value = setChartData()
+  chartOptions.value = setChartOptions()
   getReviews()
 })
 
-
 async function getPosterInfo() {
-    const { data, error } = await supabase.from('userProfiles').select('*').eq('handle', route.params.handle.substring(1)).single()
+  const { data, error } = await supabase
+    .from('userProfiles')
+    .select('*')
+    .eq('handle', route.params.handle.substring(1))
+    .single()
 
-    if (error) {
-      console.log('error: ', error)
-    } else {
-      profileInfo.value=data
-    }
+  if (error) {
+    console.log('error: ', error)
+  } else {
+    profileInfo.value = data
+  }
 }
 // Fetch user listings from db for giveaway and request count
 async function getListings() {
@@ -95,36 +97,36 @@ async function getListings() {
 }
 
 let getMonthsArr = () => {
-  var dateObj = new Date();
-  var dateStrings = [];
+  var dateObj = new Date()
+  var dateStrings = []
   var currDateMonth = new Date().getMonth() + 1
   var dateFormatOptions = {}
-  var numOfMonths = profileInfo?.value.carmaHistory ? profileInfo.value.carmaHistory.length + 1 : 1; // Add 1 to include curr month
+  var numOfMonths = profileInfo?.value.carmaHistory ? profileInfo.value.carmaHistory.length + 1 : 1 // Add 1 to include curr month
 
   if (numOfMonths <= currDateMonth) {
     dateFormatOptions = {
-      month: 'short',
-    };
+      month: 'short'
+    }
   } else {
     dateFormatOptions = {
       month: 'short',
       year: 'numeric'
-    };
+    }
   }
 
   for (var i = 0; i < numOfMonths; i++) {
-    dateObj.setMonth(dateObj.getMonth() - 1);
-    dateStrings.unshift(dateObj.toLocaleString('en-US', dateFormatOptions));
+    dateObj.setMonth(dateObj.getMonth() - 1)
+    dateStrings.unshift(dateObj.toLocaleString('en-US', dateFormatOptions))
   }
 
-  return dateStrings;
+  return dateStrings
 }
 
 const setCarmaData = () => {
   var history = profileInfo?.value.carmaHistory ? [...profileInfo.value.carmaHistory] : []
   history.push(profileInfo.value.monthlyCarma)
 
-  return history;
+  return history
 }
 
 const setChartData = () => {
@@ -139,14 +141,14 @@ const setChartData = () => {
         borderWidth: 1
       }
     ]
-  };
-};
+  }
+}
 
 const setChartOptions = () => {
-  const documentStyle = getComputedStyle(document.documentElement);
-  const textColor = documentStyle.getPropertyValue('--text-color');
-  const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-  const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+  const documentStyle = getComputedStyle(document.documentElement)
+  const textColor = documentStyle.getPropertyValue('--text-color')
+  const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary')
+  const surfaceBorder = documentStyle.getPropertyValue('--surface-border')
 
   return {
     plugins: { legend: { labels: { color: textColor } } },
@@ -161,7 +163,7 @@ const setChartOptions = () => {
         grid: { color: surfaceBorder }
       }
     }
-  };
+  }
 }
 
 // Fetch user reviews from db
@@ -181,13 +183,16 @@ async function getReviews() {
 
 // sorting function for sorting reviews by date
 function custom_sort(a, b) {
-  return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+  return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
 }
 
 // retrieve reviewer information and sort
 async function getReviewUserInfo() {
   for (const review of reviews.value) {
-    const { data, error } = await supabase.from('userProfiles').select('*').eq('id', review.reviewerID)
+    const { data, error } = await supabase
+      .from('userProfiles')
+      .select('*')
+      .eq('id', review.reviewerID)
 
     if (error) {
       console.log('error: ', error)
@@ -203,21 +208,29 @@ async function getReviewUserInfo() {
 
 let toggleModal = () => {
   if (dietary_restrictions_visible.value) {
-    dietary_restrictions_visible.value = !dietary_restrictions_visible.value;
+    dietary_restrictions_visible.value = !dietary_restrictions_visible.value
   } else if (statistics_visible.value) {
-    statistics_visible.value = !statistics_visible.value;
+    statistics_visible.value = !statistics_visible.value
   }
 }
-
 </script>
 
 <template>
   <main class="remove-padding profile-view">
     <section class="profile">
       <div class="profile-content">
-        <Avatar v-if="profileInfo.avatarUrl" :image=profileInfo.avatarUrl class="profile-photo" shape="circle" />
-        <Avatar v-else :label="`${profileInfo?.username ? profileInfo.username.charAt(0).toUpperCase() : ''}`"
-          class="profile-photo" shape="circle" />
+        <Avatar
+          v-if="profileInfo.avatarUrl"
+          :image="profileInfo.avatarUrl"
+          class="profile-photo"
+          shape="circle"
+        />
+        <Avatar
+          v-else
+          :label="`${profileInfo?.username ? profileInfo.username.charAt(0).toUpperCase() : ''}`"
+          class="profile-photo"
+          shape="circle"
+        />
         <div class="profile-info">
           <div style="display: flex; justify-content: space-between; padding-bottom: 20px">
             <div>
@@ -228,16 +241,20 @@ let toggleModal = () => {
               <Button type="button" class="edit-button" label="Edit Profile" icon="pi pi-cog" />
             </router-link>
           </div>
-          <p style="padding-bottom: 20px;">{{ profileInfo.description }}</p>
-          <Button class="dietary-restrictions" @click="dietary_restrictions_visible = true">Dietary Restrictions</Button>
+          <p style="padding-bottom: 20px">{{ profileInfo.description }}</p>
+          <Button class="dietary-restrictions" @click="dietary_restrictions_visible = true"
+            >Dietary Restrictions</Button
+          >
         </div>
         <div class="profile-statistics">
-          <div style="
+          <div
+            style="
               width: fill-available;
               display: flex;
               align-items: center;
               justify-content: space-between;
-            ">
+            "
+          >
             <div style="display: flex">
               <div class="statistics-icon-wrapper">
                 <div><Button class="icon" icon="pi pi-star" /></div>
@@ -255,10 +272,21 @@ let toggleModal = () => {
               </div>
             </div>
             <div>
-              <Button v-if="tabletScreen" type="button" class="statistics-button" @click="statistics_visible = true"
-                icon="pi pi-chart-bar" />
-              <Button v-else type="button" class="statistics-button" @click="statistics_visible = true"
-                label="View Statistics" icon="pi pi-chart-bar" />
+              <Button
+                v-if="tabletScreen"
+                type="button"
+                class="statistics-button"
+                @click="statistics_visible = true"
+                icon="pi pi-chart-bar"
+              />
+              <Button
+                v-else
+                type="button"
+                class="statistics-button"
+                @click="statistics_visible = true"
+                label="View Statistics"
+                icon="pi pi-chart-bar"
+              />
             </div>
           </div>
         </div>
@@ -270,38 +298,72 @@ let toggleModal = () => {
           <div class="container pt-small">
             <!-- <h3 v-if="num_giveaways == 0">No Giveaways Yet</h3> -->
             <div v-if="num_giveaways == 0" class="empty-view">
-              <span>You have yet to post any Giveaways!
+              <span
+                >You have yet to post any Giveaways!
                 <router-link :to="{ path: '/giveaways/create' }">
                   <a>Make one now!</a>
                 </router-link>
               </span>
-              <img src="../../assets/images/no_listings_bg.svg" alt="No Listings Default View" class="empty-view-img"/>
+              <img
+                src="../../assets/images/no_listings_bg.svg"
+                alt="No Listings Default View"
+                class="empty-view-img"
+              />
             </div>
             <div class="listings-cards">
-              <ListingsCard v-for="item in giveaways" :key="item.listingID" :listingID="item.listingID"
-                :listingType="item.listingType" :username="profileInfo.username" :avatarUrl="profileInfo.avatarUrl"
-                :postingTime="item.postingTime" :locationAddress="item.locationAddress" :category="item.category"
-                :image="item.images[0]" :listingTitle="item.listingTitle" :tags="item.tags" :status="item.status"
-                :quantityNum="item.quantityNum" :isPoster="true" />
+              <ListingsCard
+                v-for="item in giveaways"
+                :key="item.listingID"
+                :listingID="item.listingID"
+                :listingType="item.listingType"
+                :username="profileInfo.username"
+                :avatarUrl="profileInfo.avatarUrl"
+                :postingTime="item.postingTime"
+                :locationAddress="item.locationAddress"
+                :category="item.category"
+                :image="item.images[0]"
+                :listingTitle="item.listingTitle"
+                :tags="item.tags"
+                :status="item.status"
+                :quantityNum="item.quantityNum"
+                :isPoster="item.poster_id === user.currentUser?.id"
+              />
             </div>
           </div>
         </Tab>
         <Tab icon="pi-megaphone" title="Requests">
           <div class="container pt-small">
             <div v-if="num_requests == 0" class="empty-view">
-              <span>You have yet to make any Requests!
+              <span
+                >You have yet to make any Requests!
                 <router-link :to="{ path: '/requests/create' }">
                   <a>Make one now!</a>
                 </router-link>
               </span>
-              <img src="../../assets/images/no_listings_bg.svg" alt="No Listings Default View" class="empty-view-img"/>
+              <img
+                src="../../assets/images/no_listings_bg.svg"
+                alt="No Listings Default View"
+                class="empty-view-img"
+              />
             </div>
             <div class="listings-cards">
-              <ListingsCard v-for="item in requests" :key="item.listingID" :listingID="item.listingID"
-                :listingType="item.listingType" :username="profileInfo.username" :avatarUrl="profileInfo.avatarUrl"
-                :postingTime="item.postingTime" :locationAddress="item.locationAddress" :category="item.category"
-                :image="item.images[0]" :listingTitle="item.listingTitle" :tags="item.tags" :status="item.status"
-                :quantityNum="item.quantityNum" :isPoster="true" />
+              <ListingsCard
+                v-for="item in requests"
+                :key="item.listingID"
+                :listingID="item.listingID"
+                :listingType="item.listingType"
+                :username="profileInfo.username"
+                :avatarUrl="profileInfo.avatarUrl"
+                :postingTime="item.postingTime"
+                :locationAddress="item.locationAddress"
+                :category="item.category"
+                :image="item.images[0]"
+                :listingTitle="item.listingTitle"
+                :tags="item.tags"
+                :status="item.status"
+                :quantityNum="item.quantityNum"
+                :isPoster="item.poster_id === user.currentUser?.id"
+              />
             </div>
           </div>
         </Tab>
@@ -309,11 +371,18 @@ let toggleModal = () => {
     </section>
   </main>
 
-  <div v-if="dietary_restrictions_visible || statistics_visible" class="profile-view profile-view-modal"
-    @click="toggleModal"></div>
-  <Dialog :visible="dietary_restrictions_visible" :draggable="false"
-    :header="`${profileInfo.username}'s Dietary Restrictions`" :style="{ width: '50vw' }" class="
-    profile-view">
+  <div
+    v-if="dietary_restrictions_visible || statistics_visible"
+    class="profile-view profile-view-modal"
+    @click="toggleModal"
+  ></div>
+  <Dialog
+    :visible="dietary_restrictions_visible"
+    :draggable="false"
+    :header="`${profileInfo.username}'s Dietary Restrictions`"
+    :style="{ width: '50vw' }"
+    class="profile-view"
+  >
     <h3>Special Dietary Requirements</h3>
     <div v-if="profileInfo.dietaryRestrictions">
       <Tag class="category tag" :value="profileInfo.dietaryRestrictions"></Tag>
@@ -323,25 +392,47 @@ let toggleModal = () => {
     </div>
     <h3 style="margin-top: 10px">Allergies</h3>
     <div v-if="profileInfo.allergies.length != 0">
-      <Tag v-for="(item, index) in profileInfo.allergies" :key="index" class="category tag" :value="item"></Tag>
+      <Tag
+        v-for="(item, index) in profileInfo.allergies"
+        :key="index"
+        class="category tag"
+        :value="item"
+      ></Tag>
     </div>
     <div v-else>
       <p>None</p>
     </div>
   </Dialog>
-  <Dialog :visible="statistics_visible" :draggable="false" :header="`${profileInfo.username}'s Activity`"
-    :style="{ width: '50vw', height: '75%' }" class="profile-view">
+  <Dialog
+    :visible="statistics_visible"
+    :draggable="false"
+    :header="`${profileInfo.username}'s Activity`"
+    :style="{ width: '50vw', height: '75%' }"
+    class="profile-view"
+  >
     <TabsWrapper>
       <Tab icon="pi-hourglass" title="Carma">
         <div class="container pt-small">
-          <h3 style="text-align: center;">All-time Carma:<span style="font-size: 1.2rem; color: var(--color-primary)"><i
-                style="margin: 0 5px;" class="pi pi-hourglass"></i>{{ profileInfo.totalCarma }}</span></h3>
-          <h3 style="text-align: center;">Carma earned this month:<span
-              style="font-size: 1.2rem; color: var(--color-primary)"><i style="margin: 0 5px;"
-                class="pi pi-hourglass"></i>{{ profileInfo.monthlyCarma }}</span></h3>
+          <h3 style="text-align: center">
+            All-time Carma:<span style="font-size: 1.2rem; color: var(--color-primary)"
+              ><i style="margin: 0 5px" class="pi pi-hourglass"></i
+              >{{ profileInfo.totalCarma }}</span
+            >
+          </h3>
+          <h3 style="text-align: center">
+            Carma earned this month:<span style="font-size: 1.2rem; color: var(--color-primary)"
+              ><i style="margin: 0 5px" class="pi pi-hourglass"></i
+              >{{ profileInfo.monthlyCarma }}</span
+            >
+          </h3>
           <br />
           <div>
-            <Chart type="bar" :data="chartData" :options="chartOptions" :canvasProps="{ 'display': 'flex' }" />
+            <Chart
+              type="bar"
+              :data="chartData"
+              :options="chartOptions"
+              :canvasProps="{ display: 'flex' }"
+            />
           </div>
         </div>
       </Tab>
@@ -350,10 +441,22 @@ let toggleModal = () => {
           <div class="review-card" v-for="(review, index) in reviews" :key="index">
             <div class="review-header">
               <div>
-                <Avatar v-if="review.reviewerAvatarUrl != null" id="avatar" class="mr-2" size="large" shape="circle"
-                  :image="review.reviewerAvatarUrl" />
-                <Avatar v-else id="avatar" class="mr-2" size="large" shape="circle"
-                  :label="review.reviewerUsername?.[0].toUpperCase()" />
+                <Avatar
+                  v-if="review.reviewerAvatarUrl != null"
+                  id="avatar"
+                  class="mr-2"
+                  size="large"
+                  shape="circle"
+                  :image="review.reviewerAvatarUrl"
+                />
+                <Avatar
+                  v-else
+                  id="avatar"
+                  class="mr-2"
+                  size="large"
+                  shape="circle"
+                  :label="review.reviewerUsername?.[0].toUpperCase()"
+                />
               </div>
               <div>
                 <div>
@@ -500,7 +603,7 @@ let toggleModal = () => {
   }
 
   .profile-view .icon {
-    display: none
+    display: none;
   }
 
   .profile-view .statistics-button {
@@ -537,7 +640,7 @@ Overriding PrimeVue's tab component styles
   justify-items: center;
 }
 
-.profile-view .tabview-custom>a {
+.profile-view .tabview-custom > a {
   width: 170px !important;
 }
 </style>
