@@ -7,5 +7,6 @@ export const useListingsStore = defineStore('listings', () => {
     routeName: 'Create Giveaway'
   })
 
-  return { listingsHeader }
+  const selectedPosterHandle = ref("")
+  return { listingsHeader, selectedPosterHandle }
 })

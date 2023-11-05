@@ -24,10 +24,11 @@ import {
 } from '../../util/constants'
 
 import { useRoute } from 'vue-router'
+import router from '../../router'
+
 import { useUserStore } from '../../stores/user'
 import { useChatStore } from '../../stores/chat'
 import { useToast, POSITION } from 'vue-toastification'
-import router from '../../router'
 import { REALTIME_POSTGRES_CHANGES_LISTEN_EVENT } from '@supabase/supabase-js'
 
 const route = useRoute()
@@ -43,6 +44,7 @@ const flickingImageCarousel = ref()
 const form = ref({
   posterID: '',
   username: '',
+  handle: '',
   userAllergies: '',
   listingType: '', // (LISTING_TYPE.Request for CreateEditRequestView.vue)
   listingTitle: '',
@@ -72,7 +74,7 @@ const getGiveawayDetailData = async () => {
   const { data, error } = await supabase
     .from('listings')
     .select(
-      'poster_id,listingID,listingType, listingDesc, postingTime, locationAddress, locationDesc, locationCoords, category, dietaryRestrictions, allergens, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl, allergies)'
+      'poster_id,listingID,listingType, listingDesc, postingTime, locationAddress, locationDesc, locationCoords, category, dietaryRestrictions, allergens, images, listingTitle, tags,status, quantityNum, userProfiles(username, avatarUrl, handle, allergies)'
     )
     .match({ listingID: route.params.id })
     .single()
@@ -88,6 +90,7 @@ const getGiveawayDetailData = async () => {
     form.value = {
       posterID: data.poster_id,
       username: data.userProfiles.username,
+      handle: data.userProfiles.handle,
       avatarUrl: data.userProfiles.avatarUrl,
       userAllergies: data.userProfiles.allergies,
       listingType: data.listingType, // (LISTING_TYPE.Request for CreateEditRequestView.vue)
@@ -379,7 +382,9 @@ const handleChatWithUser = async () => {
          
           <!-- <Avatar label="P" shape="circle" style="height: 180px; width: 180px" /> -->
           <div class="giver-information-content">
-            <h3>{{ form.username }}</h3>
+            <router-link :to="{ path: `/profile/@${form.handle}` }">
+              <h3>{{ form.username }}</h3>
+            </router-link>
 
             <div v-if="form.userAllergies" class="food-allergens-container">
               <p>Food Allergens</p>
