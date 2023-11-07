@@ -414,15 +414,21 @@ let toggleModal = () => {
       <Tab icon="pi-hourglass" title="Carma">
         <div class="container pt-small">
           <h3 style="text-align: center">
-            All-time Carma:<span style="font-size: 1.2rem; color: var(--color-primary)"
+            All-time Carma:<span class="statistics-carma-text"
               ><i style="margin: 0 5px" class="pi pi-hourglass"></i
               >{{ profileInfo.totalCarma }}</span
             >
           </h3>
           <h3 style="text-align: center">
-            Carma earned this month:<span style="font-size: 1.2rem; color: var(--color-primary)"
+            Carma earned this month:<span class="statistics-carma-text"
               ><i style="margin: 0 5px" class="pi pi-hourglass"></i
               >{{ profileInfo.monthlyCarma }}</span
+            >
+          </h3>
+          <h3 style="text-align: center">
+            Total Carma Donated to the Community:<span class="statistics-carma-text"
+              ><i style="margin: 0 5px" class="pi pi-hourglass"></i
+              >{{ profileInfo.totalDonatedCarma }}</span
             >
           </h3>
           <br />
@@ -501,6 +507,11 @@ let toggleModal = () => {
   justify-content: center;
   align-items: center;
   margin-right: 20px;
+}
+
+.profile-view .statistics-carma-text {
+  font-size: 1.2rem;
+  color: var(--color-primary);
 }
 
 .profile-view .statistics-button {
