@@ -130,9 +130,8 @@ const handleCreateRequest = async () => {
   // Upload the images to a Supabase bucket
   for (let image of imageFiles.value) {
     const imageFileFormat = image.name.split('.')[1] // file format: .jpg/.jpeg/.png
-    const filename = `${user.currentUser.id}_${
-      image.name
-    }_${new Date().getTime()}.${imageFileFormat}`
+    const filename = `${user.currentUser.id}_${image.name
+      }_${new Date().getTime()}.${imageFileFormat}`
 
     const { data: imageUploadResponse, error: imageUploadError } = await supabase.storage
       .from('listings')
@@ -176,11 +175,35 @@ const handleCreateRequest = async () => {
     })
     isLoading.value = false
   } else {
-    router.push({ name: 'Requests' })
-    toast.success('Created Request successfully', {
-      position: POSITION.TOP_CENTER,
-      timeout: 5000
-    })
+    // Check if user has enough carma
+    if (user.profile.currBalanceCarma < 5) {
+      toast.error('Cannot Create Request: Not enough Carma', {
+        position: POSITION.TOP_CENTER
+      })
+    } else {
+      // Deduct carma
+      const { data, error } = await supabase
+        .from('userProfiles')
+        .update({
+          currBalanceCarma: user.profile.currBalanceCarma - 5,
+        })
+        .match({ id: user.profile.id })
+      if (error) {
+        console.log('Error updating user carma:', error.message)
+        toast.error('Created Request unsuccessful', {
+          position: POSITION.TOP_CENTER
+        })
+        isLoading.value = false
+      } else {
+        user.profile = await user.fetchUserProfile()
+
+        router.push({ name: 'Requests' })
+        toast.success('Created Request successfully', {
+          position: POSITION.TOP_CENTER,
+          timeout: 5000
+        })
+      }
+    }
   }
 
   isLoading.value = false
@@ -232,9 +255,8 @@ const handleUploadImages = (images) => {
   imageFiles.value = images.value
 }
 
-const gmapLink = `https://maps.googleapis.com/maps/api/js?key=${
-  import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-}&libraries=places`
+const gmapLink = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+  }&libraries=places`
 
 onMounted(() => {
   new Promise((resolve, reject) => {
@@ -279,20 +301,10 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
       <section class="preview">
         <!-- Card goes here -->
         <p class="preview-title">Preview Card</p>
-        <ListingsCard
-          :listingType="form.listingType"
-          :username="user.profile?.username"
-          :avatarUrl="user.profile?.avatarUrl"
-          :postingTime="null"
-          :locationAddress="form.locationAddress"
-          :category="form.category"
-          :image="form.images?.[0] ?? imageFiles[0]?.url"
-          :listingTitle="form.listingTitle"
-          :tags="form.tags"
-          :status="form.status"
-          :quantityNum="form.quantityNum"
-          :isPoster="true"
-        />
+        <ListingsCard :listingType="form.listingType" :username="user.profile?.username"
+          :avatarUrl="user.profile?.avatarUrl" :postingTime="null" :locationAddress="form.locationAddress"
+          :category="form.category" :image="form.images?.[0] ?? imageFiles[0]?.url" :listingTitle="form.listingTitle"
+          :tags="form.tags" :status="form.status" :quantityNum="form.quantityNum" :isPoster="true" />
       </section>
 
       <section class="form-container">
@@ -318,53 +330,29 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                 </div> -->
 
                 <div class="p-float-label request-category">
-                  <Dropdown
-                    @change="handleChangeCategoryOption"
-                    v-model="form.category"
-                    :options="categoryOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full"
-                  />
+                  <Dropdown @change="handleChangeCategoryOption" v-model="form.category" :options="categoryOptions"
+                    optionLabel="label" optionValue="value" class="w-full" />
 
                   <label>Request Category</label>
                 </div>
 
                 <div class="p-float-label request-status">
-                  <Dropdown
-                    v-model="form.status"
-                    :options="statusOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full"
-                  />
+                  <Dropdown v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value"
+                    class="w-full" />
 
                   <label for="dd-city">Request Status</label>
                 </div>
 
                 <div v-if="form.category === CATEGORY.Food" class="p-float-label request-serving">
-                  <Dropdown
-                    v-model="form.quantityNum"
-                    :options="servingsizeOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full"
-                  />
+                  <Dropdown v-model="form.quantityNum" :options="servingsizeOptions" optionLabel="label"
+                    optionValue="value" class="w-full" />
 
                   <label>Serving Size</label>
                 </div>
 
-                <div
-                  v-if="form.category === CATEGORY.Food"
-                  class="p-float-label request-restrictions"
-                >
-                  <Dropdown
-                    v-model="form.dietaryRestrictions"
-                    :options="dietaryRestrictionsOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full"
-                  />
+                <div v-if="form.category === CATEGORY.Food" class="p-float-label request-restrictions">
+                  <Dropdown v-model="form.dietaryRestrictions" :options="dietaryRestrictionsOptions" optionLabel="label"
+                    optionValue="value" class="w-full" />
 
                   <label>Dietary Restrictions</label>
                 </div>
@@ -376,30 +364,15 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                   </span>
                 </div>
 
-                <div
-                  v-if="form.category === CATEGORY.Food"
-                  class="p-float-label request-allergens"
-                >
-                  <MultiSelect
-                    display="chip"
-                    v-model="form.foodAllergens"
-                    :options="allergensOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full"
-                  />
+                <div v-if="form.category === CATEGORY.Food" class="p-float-label request-allergens">
+                  <MultiSelect display="chip" v-model="form.foodAllergens" :options="allergensOptions" optionLabel="label"
+                    optionValue="value" class="w-full" />
 
                   <label>List of Allergens</label>
                 </div>
 
                 <span class="p-float-label request-description">
-                  <Textarea
-                    v-model="form.description"
-                    autoResize
-                    rows="5"
-                    cols="30"
-                    class="w-full"
-                  />
+                  <Textarea v-model="form.description" autoResize rows="5" cols="30" class="w-full" />
                   <label>Description</label>
                 </span>
               </div>
@@ -429,8 +402,7 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                   <label>Location Address</label>
                 </span> -->
                 {{ form.locationCoords }}
-                <input
-                  style="
+                <input style="
                     font-family: inherit;
                     font-feature-settings: inherit;
                     font-size: 1rem;
@@ -439,21 +411,10 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                     padding: 0.75rem 0.75rem;
                     border: 1px solid #ced4da;
                     border-radius: 6px;
-                  "
-                  type="text"
-                  ref="locationAddressRef"
-                  v-model="form.locationAddress"
-                  class="w-full"
-                />
+                  " type="text" ref="locationAddressRef" v-model="form.locationAddress" class="w-full" />
 
                 <span class="p-float-label request-location-description">
-                  <Textarea
-                    v-model="form.locationDescription"
-                    autoResize
-                    rows="5"
-                    cols="30"
-                    class="w-full"
-                  />
+                  <Textarea v-model="form.locationDescription" autoResize rows="5" cols="30" class="w-full" />
                   <label>Location Description</label>
                 </span>
               </div>
@@ -467,33 +428,15 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
           </div>
 
           <div class="btn-container pt-small">
-            <Button
-              v-if="tabletScreen"
-              icon="pi pi-eye"
-              aria-label="Preview"
-              rounded
-              @click="showPreview = true"
-            />
+            <Button v-if="tabletScreen" icon="pi pi-eye" aria-label="Preview" rounded @click="showPreview = true" />
             <div class="next-prev-btn-container">
               <router-link to="">
                 <Button icon="pi pi-times" label="Cancel" rounded outlined @click="handleBackBtn" />
               </router-link>
-              <Button
-                v-if="route.name === 'Edit Request'"
-                icon="pi pi-plus"
-                label="Save Changes"
-                rounded
-                :disabled="isLoading"
-                @click="handleEditRequest"
-              />
-              <Button
-                v-else
-                icon="pi pi-plus"
-                label="Create"
-                rounded
-                :disabled="isLoading"
-                @click="handleCreateRequest"
-              />
+              <Button v-if="route.name === 'Edit Request'" icon="pi pi-plus" label="Save Changes" rounded
+                :disabled="isLoading" @click="handleEditRequest" />
+              <Button v-else icon="pi pi-plus" label="Create" rounded :disabled="isLoading"
+                @click="handleCreateRequest" />
             </div>
           </div>
         </form>
@@ -502,20 +445,10 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
   </main>
   <!-- Dialog goes here -->
   <Dialog v-model:visible="showPreview" modal header="Listing Preview" class="preview-dialog">
-    <ListingsCard
-      :listingType="form.listingType"
-      :username="user.profile?.username"
-      :avatarUrl="user.profile?.avatarUrl"
-      :postingTime="null"
-      :locationAddress="form.locationAddress"
-      :category="form.category"
-      :image="form.images?.[0] ?? imageFiles[0]?.url"
-      :listingTitle="form.listingTitle"
-      :tags="form.tags"
-      :status="form.status"
-      :quantityNum="form.quantityNum"
-      :isPoster="true"
-    />
+    <ListingsCard :listingType="form.listingType" :username="user.profile?.username" :avatarUrl="user.profile?.avatarUrl"
+      :postingTime="null" :locationAddress="form.locationAddress" :category="form.category"
+      :image="form.images?.[0] ?? imageFiles[0]?.url" :listingTitle="form.listingTitle" :tags="form.tags"
+      :status="form.status" :quantityNum="form.quantityNum" :isPoster="true" />
   </Dialog>
 </template>
 
@@ -527,6 +460,7 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
 main {
   padding: unset;
 }
+
 .container-create-edit-request {
   max-width: 1150px;
   padding-top: 25px;
@@ -536,10 +470,12 @@ main {
   margin-bottom: 20px;
   font-size: 1.3em;
 }
+
 .preview-btn-container {
   display: none;
   /* margin-top: 50px; */
 }
+
 .preview {
   position: sticky;
   width: var(--preview-card-width);
@@ -576,11 +512,13 @@ main {
   flex-wrap: wrap;
   gap: 40px;
 }
+
 .request-name {
   grid-area: request-name;
   /* width: 100%; */
   flex: 100%;
 }
+
 /* .request-type {
   grid-area: request-type;
 } */
@@ -589,16 +527,19 @@ main {
   /* width: 50%; */
   flex: 40%;
 }
+
 .request-status {
   grid-area: request-status;
   /* width: 50%; */
   flex: 40%;
 }
+
 .request-serving {
   grid-area: request-serving;
   /* width: 100%; */
   flex: 100%;
 }
+
 .request-restrictions {
   grid-area: request-restrictions;
   /* width: 100%; */
@@ -610,11 +551,13 @@ main {
   /* width: 100%; */
   flex: 100%;
 }
+
 .request-allergens {
   grid-area: request-allergens;
   /* width: 100%; */
   flex: 100%;
 }
+
 .request-description {
   grid-area: request-description;
   /* width: 100%; */
@@ -650,6 +593,7 @@ main {
   padding: 15px;
   z-index: 999;
 }
+
 .next-prev-btn-container {
   display: flex;
   gap: 15px;
@@ -659,6 +603,7 @@ main {
   main {
     padding-top: 40px;
   }
+
   .preview-btn-container {
     display: flex;
     justify-content: right;
@@ -698,6 +643,7 @@ main {
     /* width: 50%; */
     flex: 100%;
   }
+
   .request-status {
     grid-area: request-status;
     /* width: 50%; */

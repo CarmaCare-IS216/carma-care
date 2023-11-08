@@ -130,9 +130,8 @@ const handleCreateGiveaway = async () => {
   // Upload the images to a Supabase bucket
   for (let image of imageFiles.value) {
     const imageFileFormat = image.name.split('.')[1] // file format: .jpg/.jpeg/.png
-    const filename = `${user.currentUser.id}_${
-      image.name
-    }_${new Date().getTime()}.${imageFileFormat}`
+    const filename = `${user.currentUser.id}_${image.name
+      }_${new Date().getTime()}.${imageFileFormat}`
 
     const { data: imageUploadResponse, error: imageUploadError } = await supabase.storage
       .from('listings')
@@ -176,11 +175,30 @@ const handleCreateGiveaway = async () => {
     })
     isLoading.value = false
   } else {
-    router.push({ name: 'Giveaways' })
-    toast.success('Created Giveaway successfully', {
-      position: POSITION.TOP_CENTER,
-      timeout: 5000
-    })
+    // Update Carma
+    const { data, error } = await supabase
+      .from('userProfiles')
+      .update({
+        currBalanceCarma: user.profile.currBalanceCarma + 20,
+        monthlyCarma: user.profile.monthlyCarma + 20,
+        totalCarma: user.profile.totalCarma + 20
+      })
+      .match({ id: user.profile.id })
+    if (error) {
+      console.log('Error updating user carma:', error.message)
+      toast.error('Created Giveaway unsuccessful', {
+        position: POSITION.TOP_CENTER
+      })
+      isLoading.value = false
+    } else {
+      user.profile = await user.fetchUserProfile()
+
+      router.push({ name: 'Giveaways' })
+      toast.success('Created Giveaway successfully', {
+        position: POSITION.TOP_CENTER,
+        timeout: 5000
+      })
+    }
   }
 
   isLoading.value = false
@@ -232,9 +250,8 @@ const handleUploadImages = (images) => {
   imageFiles.value = images.value
 }
 
-const gmapLink = `https://maps.googleapis.com/maps/api/js?key=${
-  import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-}&libraries=places`
+const gmapLink = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+  }&libraries=places`
 
 onMounted(() => {
   new Promise((resolve, reject) => {
@@ -279,20 +296,10 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
       <section class="preview">
         <!-- Card goes here -->
         <p class="preview-title">Preview Card</p>
-        <ListingsCard
-          :listingType="form.listingType"
-          :username="user.profile?.username"
-          :avatarUrl="user.profile?.avatarUrl"
-          :postingTime="null"
-          :locationAddress="form.locationAddress"
-          :category="form.category"
-          :image="form.images?.[0] ?? imageFiles[0]?.url"
-          :listingTitle="form.listingTitle"
-          :tags="form.tags"
-          :status="form.status"
-          :quantityNum="form.quantityNum"
-          :isPoster="true"
-        />
+        <ListingsCard :listingType="form.listingType" :username="user.profile?.username"
+          :avatarUrl="user.profile?.avatarUrl" :postingTime="null" :locationAddress="form.locationAddress"
+          :category="form.category" :image="form.images?.[0] ?? imageFiles[0]?.url" :listingTitle="form.listingTitle"
+          :tags="form.tags" :status="form.status" :quantityNum="form.quantityNum" :isPoster="true" />
       </section>
 
       <section class="form-container">
@@ -318,53 +325,29 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                 </div> -->
 
                 <div class="p-float-label giveaway-category">
-                  <Dropdown
-                    @change="handleChangeCategoryOption"
-                    v-model="form.category"
-                    :options="categoryOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full"
-                  />
+                  <Dropdown @change="handleChangeCategoryOption" v-model="form.category" :options="categoryOptions"
+                    optionLabel="label" optionValue="value" class="w-full" />
 
                   <label>Giveaway Category</label>
                 </div>
 
                 <div class="p-float-label giveaway-status">
-                  <Dropdown
-                    v-model="form.status"
-                    :options="statusOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full"
-                  />
+                  <Dropdown v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value"
+                    class="w-full" />
 
                   <label for="dd-city">Giveaway Status</label>
                 </div>
 
                 <div v-if="form.category === CATEGORY.Food" class="p-float-label giveaway-serving">
-                  <Dropdown
-                    v-model="form.quantityNum"
-                    :options="servingsizeOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full"
-                  />
+                  <Dropdown v-model="form.quantityNum" :options="servingsizeOptions" optionLabel="label"
+                    optionValue="value" class="w-full" />
 
                   <label>Serving Size</label>
                 </div>
 
-                <div
-                  v-if="form.category === CATEGORY.Food"
-                  class="p-float-label giveaway-restrictions"
-                >
-                  <Dropdown
-                    v-model="form.dietaryRestrictions"
-                    :options="dietaryRestrictionsOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full"
-                  />
+                <div v-if="form.category === CATEGORY.Food" class="p-float-label giveaway-restrictions">
+                  <Dropdown v-model="form.dietaryRestrictions" :options="dietaryRestrictionsOptions" optionLabel="label"
+                    optionValue="value" class="w-full" />
 
                   <label>Dietary Restrictions</label>
                 </div>
@@ -376,30 +359,15 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                   </span>
                 </div>
 
-                <div
-                  v-if="form.category === CATEGORY.Food"
-                  class="p-float-label giveaway-allergens"
-                >
-                  <MultiSelect
-                    display="chip"
-                    v-model="form.foodAllergens"
-                    :options="allergensOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full"
-                  />
+                <div v-if="form.category === CATEGORY.Food" class="p-float-label giveaway-allergens">
+                  <MultiSelect display="chip" v-model="form.foodAllergens" :options="allergensOptions" optionLabel="label"
+                    optionValue="value" class="w-full" />
 
                   <label>List of Allergens</label>
                 </div>
 
                 <span class="p-float-label giveaway-description">
-                  <Textarea
-                    v-model="form.description"
-                    autoResize
-                    rows="5"
-                    cols="30"
-                    class="w-full"
-                  />
+                  <Textarea v-model="form.description" autoResize rows="5" cols="30" class="w-full" />
                   <label>Description</label>
                 </span>
               </div>
@@ -429,8 +397,7 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                   <label>Location Address</label>
                 </span> -->
                 {{ form.locationCoords }}
-                <input
-                  style="
+                <input style="
                     font-family: inherit;
                     font-feature-settings: inherit;
                     font-size: 1rem;
@@ -439,21 +406,10 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
                     padding: 0.75rem 0.75rem;
                     border: 1px solid #ced4da;
                     border-radius: 6px;
-                  "
-                  type="text"
-                  ref="locationAddressRef"
-                  v-model="form.locationAddress"
-                  class="w-full"
-                />
+                  " type="text" ref="locationAddressRef" v-model="form.locationAddress" class="w-full" />
 
                 <span class="p-float-label giveaway-location-description">
-                  <Textarea
-                    v-model="form.locationDescription"
-                    autoResize
-                    rows="5"
-                    cols="30"
-                    class="w-full"
-                  />
+                  <Textarea v-model="form.locationDescription" autoResize rows="5" cols="30" class="w-full" />
                   <label>Location Description</label>
                 </span>
               </div>
@@ -467,33 +423,15 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
           </div>
 
           <div class="btn-container pt-small">
-            <Button
-              v-if="tabletScreen"
-              icon="pi pi-eye"
-              aria-label="Preview"
-              rounded
-              @click="showPreview = true"
-            />
+            <Button v-if="tabletScreen" icon="pi pi-eye" aria-label="Preview" rounded @click="showPreview = true" />
             <div class="next-prev-btn-container">
               <router-link to="">
                 <Button icon="pi pi-times" label="Cancel" rounded outlined @click="handleBackBtn" />
               </router-link>
-              <Button
-                v-if="route.name === 'Edit Giveaway'"
-                icon="pi pi-plus"
-                label="Save Changes"
-                rounded
-                :disabled="isLoading"
-                @click="handleEditGiveaway"
-              />
-              <Button
-                v-else
-                icon="pi pi-plus"
-                label="Create"
-                rounded
-                :disabled="isLoading"
-                @click="handleCreateGiveaway"
-              />
+              <Button v-if="route.name === 'Edit Giveaway'" icon="pi pi-plus" label="Save Changes" rounded
+                :disabled="isLoading" @click="handleEditGiveaway" />
+              <Button v-else icon="pi pi-plus" label="Create" rounded :disabled="isLoading"
+                @click="handleCreateGiveaway" />
             </div>
           </div>
         </form>
@@ -502,20 +440,10 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
   </main>
   <!-- Dialog goes here -->
   <Dialog v-model:visible="showPreview" modal header="Listing Preview" class="preview-dialog">
-    <ListingsCard
-      :listingType="form.listingType"
-      :username="user.profile?.username"
-      :avatarUrl="user.profile?.avatarUrl"
-      :postingTime="null"
-      :locationAddress="form.locationAddress"
-      :category="form.category"
-      :image="form.images?.[0] ?? imageFiles[0]?.url"
-      :listingTitle="form.listingTitle"
-      :tags="form.tags"
-      :status="form.status"
-      :quantityNum="form.quantityNum"
-      :isPoster="true"
-    />
+    <ListingsCard :listingType="form.listingType" :username="user.profile?.username" :avatarUrl="user.profile?.avatarUrl"
+      :postingTime="null" :locationAddress="form.locationAddress" :category="form.category"
+      :image="form.images?.[0] ?? imageFiles[0]?.url" :listingTitle="form.listingTitle" :tags="form.tags"
+      :status="form.status" :quantityNum="form.quantityNum" :isPoster="true" />
   </Dialog>
 </template>
 
@@ -527,6 +455,7 @@ const tabletScreen = useMatchMedia(screenSize.tablet)
 main {
   padding: unset;
 }
+
 .container-create-edit-giveaway {
   max-width: 1150px;
   padding-top: 25px;
@@ -536,10 +465,12 @@ main {
   margin-bottom: 20px;
   font-size: 1.3em;
 }
+
 .preview-btn-container {
   display: none;
   /* margin-top: 50px; */
 }
+
 .preview {
   position: sticky;
   width: var(--preview-card-width);
@@ -576,11 +507,13 @@ main {
   flex-wrap: wrap;
   gap: 40px;
 }
+
 .giveaway-name {
   grid-area: giveaway-name;
   /* width: 100%; */
   flex: 100%;
 }
+
 /* .giveaway-type {
   grid-area: giveaway-type;
 } */
@@ -589,16 +522,19 @@ main {
   /* width: 50%; */
   flex: 40%;
 }
+
 .giveaway-status {
   grid-area: giveaway-status;
   /* width: 50%; */
   flex: 40%;
 }
+
 .giveaway-serving {
   grid-area: giveaway-serving;
   /* width: 100%; */
   flex: 100%;
 }
+
 .giveaway-restrictions {
   grid-area: giveaway-restrictions;
   /* width: 100%; */
@@ -610,11 +546,13 @@ main {
   /* width: 100%; */
   flex: 100%;
 }
+
 .giveaway-allergens {
   grid-area: giveaway-allergens;
   /* width: 100%; */
   flex: 100%;
 }
+
 .giveaway-description {
   grid-area: giveaway-description;
   /* width: 100%; */
@@ -650,6 +588,7 @@ main {
   padding: 15px;
   z-index: 999;
 }
+
 .next-prev-btn-container {
   display: flex;
   gap: 15px;
@@ -659,6 +598,7 @@ main {
   main {
     padding-top: 40px;
   }
+
   .preview-btn-container {
     display: flex;
     justify-content: right;
@@ -698,6 +638,7 @@ main {
     /* width: 50%; */
     flex: 100%;
   }
+
   .giveaway-status {
     grid-area: giveaway-status;
     /* width: 50%; */
